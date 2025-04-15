@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement()) @map("role_id")
+  name        String   @unique @map("role_name") @db.VarChar(50)
+  type        RoleType @default(STUDENT)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  users       User[]
+
+  @@map("Roles")
+}
+enum RoleType {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id               Int              @id @default(autoincrement()) @map("user_id")
+  email            String           @unique @db.VarChar(255)
+  passwordHash     String           @map("password_hash") @db.VarChar(255)
+  roleId           Int              @map("role_id")
+  fullName         String           @map("full_name") @db.VarChar(100)
+  profilePictureUrl String?          @map("profile_picture_url") @db.VarChar(255)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at")
+  
+  // Relations
+  role             Role             @relation(fields: [roleId], references: [id])
+  courses          Course[]
+  enrollments      Enrollment[]
+  studyGroups      StudyGroup[]     @relation("CreatedByUser")
+  groupMemberships GroupMember[]
+  messages         Message[]
+  progress         Progress[]
+  payments         Payment[]
+  communityPosts   CommunityPost[]
+
+  @@index([roleId])
+  @@map("Users")
+}
+
+model Course {
+  id           Int          @id @default(autoincrement()) @map("course_id")
+  teacherId    Int          @map("teacher_id")
+  title        String       @db.VarChar(120)
+  description  String?      @db.Text
+  thumbnailUrl String?      @map("thumbnail_url") @db.VarChar(255)
+  price        Decimal      @db.Decimal(10, 2)
+  isPublished  Boolean      @default(false) @map("is_published")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  
+  // Relations
+  teacher      User         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  studyGroups  StudyGroup[]
+  payments     Payment[]
+
+  @@index([teacherId])
+  @@map("Courses")
+}
+
+model Lesson {
+  id          Int       @id @default(autoincrement()) @map("lesson_id")
+  courseId    Int       @map("course_id")
+  title       String    @db.VarChar(120)
+  videoUrl    String    @map("video_url") @db.VarChar(255)
+  duration    Int?      @db.Int // Duration in seconds
+  lessonOrder Int       @map("lesson_order")
+  
+  // Relations
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz        Quiz?
+  progress    Progress[]
+
+  @@unique([courseId, lessonOrder])
+  @@index([courseId])
+  @@map("Lessons")
+}
+
+model Quiz {
+  id            Int     @id @default(autoincrement()) @map("quiz_id")
+  lessonId      Int     @unique @map("lesson_id")
+  question      String  @db.Text
+  options       Json    // JSON array of options
+  correctAnswer String  @map("correct_answer") @db.VarChar(255)
+  maxScore      Int     @default(10) @map("max_score")
+  
+  // Relations
+  lesson        Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("Quizzes")
+}
+
+model Enrollment {
+  id            Int      @id @default(autoincrement()) @map("enrollment_id")
+  userId        Int      @map("user_id")
+  courseId      Int      @map("course_id")
+  paymentStatus PaymentStatus @map("payment_status") @default(pending)
+  enrolledAt    DateTime @default(now()) @map("enrolled_at")
+  
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("Enrollments")
+}
+
+model StudyGroup {
+  id        Int           @id @default(autoincrement()) @map("group_id")
+  courseId  Int           @map("course_id")
+  name      String        @db.VarChar(80)
+  createdBy Int           @map("created_by")
+  createdAt DateTime      @default(now()) @map("created_at")
+  
+  // Relations
+  course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  creator   User          @relation("CreatedByUser", fields: [createdBy], references: [id], onDelete: Cascade)
+  members   GroupMember[]
+  messages  Message[]
+
+  @@index([courseId])
+  @@map("Study_Groups")
+}
+
+model GroupMember {
+  id        Int        @id @default(autoincrement()) @map("member_id")
+  groupId   Int        @map("group_id")
+  userId    Int        @map("user_id")
+  joinedAt  DateTime   @default(now()) @map("joined_at")
+  
+  // Relations
+  group     StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("Group_Members")
+}
+
+model Message {
+  id        Int        @id @default(autoincrement()) @map("message_id")
+  groupId   Int        @map("group_id")
+  senderId  Int        @map("sender_id")
+  content   String     @db.Text
+  sentAt    DateTime   @default(now()) @map("sent_at")
+  
+  // Relations
+  group     StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  sender    User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([senderId])
+  @@map("Messages")
+}
+
+model Progress {
+  id          Int       @id @default(autoincrement()) @map("progress_id")
+  userId      Int       @map("user_id")
+  lessonId    Int       @map("lesson_id")
+  quizScore   Int?      @map("quiz_score")
+  isCompleted Boolean   @default(false) @map("is_completed")
+  completedAt DateTime? @map("completed_at")
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@map("Progress")
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement()) @map("payment_id")
+  userId        Int      @map("user_id")
+  courseId      Int      @map("course_id")
+  amount        Decimal  @db.Decimal(10, 2)
+  transactionId String   @map("transaction_id") @db.VarChar(255)
+  status        TransactionStatus @map("status") @default(pending)
+  paymentMethod String   @map("payment_method") @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([transactionId])
+  @@map("Payments")
+}
+enum PaymentStatus {
+  pending
+  paid
+  failed
+}
+enum TransactionStatus {
+  pending
+  completed
+  refunded
+}
+
+model CommunityPost {
+  id        Int      @id @default(autoincrement()) @map("post_id")
+  authorId  Int      @map("author_id")
+  content   String   @db.Text
+  imageUrl  String?  @map("image_url") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@map("Community_Posts")
+}
