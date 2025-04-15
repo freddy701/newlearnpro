@@ -16,8 +16,8 @@ export default async function middleware(req: NextRequestWithAuth) {
   // Path specifically for teachers
   const isTeacherPath = req.nextUrl.pathname.startsWith("/teacher");
   
-  // Path specifically for students
-  const isStudentPath = req.nextUrl.pathname.startsWith("/student");
+  // Path for dashboard (requires authentication)
+  const isDashboardPath = req.nextUrl.pathname.startsWith("/dashboard");
   
   // Path for contact form (accessible to authenticated users)
   const isContactPath = req.nextUrl.pathname === "/contact/become-teacher";
@@ -29,28 +29,14 @@ export default async function middleware(req: NextRequestWithAuth) {
 
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && (req.nextUrl.pathname === "/auth/login" || req.nextUrl.pathname === "/auth/register")) {
-    // Redirect based on role
-    if (token.role === "TEACHER") {
-      return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
-    } else {
-      return NextResponse.redirect(new URL("/student/dashboard", req.url));
-    }
+    // Redirect to dashboard
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   // Protect teacher routes - only teachers and admins can access
   if (isTeacherPath && isAuthenticated) {
     if (token.role !== "TEACHER" && token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/student/dashboard", req.url));
-    }
-  }
-
-  // Protect student routes - ensure only authenticated users access
-  if (isStudentPath && isAuthenticated) {
-    // All authenticated users can access student routes, but we'll redirect admins and teachers to their dashboards
-    if (token.role === "TEACHER") {
-      return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
-    } else if (token.role === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }
 
