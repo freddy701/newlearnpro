@@ -1,14 +1,19 @@
 import { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
-import { RoleType } from "../../../generated/prisma";
+import { RoleType } from "@/generated/prisma";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any,
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -53,11 +58,30 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account, profile }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
+      
+      // Si c'est un nouvel utilisateur Google, attribuer le rôle STUDENT par défaut
+      if (account && account.provider === "google" && !token.role) {
+        // Trouver le rôle STUDENT
+        const studentRole = await prisma.role.findFirst({
+          where: { type: "STUDENT" }
+        });
+        
+        if (studentRole) {
+          // Mettre à jour l'utilisateur avec le rôle STUDENT
+          await prisma.user.update({
+            where: { id: parseInt(token.id as string) },
+            data: { roleId: studentRole.id }
+          });
+          
+          token.role = "STUDENT";
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {

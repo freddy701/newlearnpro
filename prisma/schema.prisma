@@ -30,10 +30,52 @@ enum RoleType {
   STUDENT
 }
 
+model Account {
+  id                String  @id @default(cuid()) @map("account_id")
+  userId            Int     @map("user_id")
+  type              String  @db.VarChar(50)
+  provider          String  @db.VarChar(50)
+  providerAccountId String  @map("provider_account_id") @db.VarChar(255)
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String? @db.VarChar(50)
+  scope             String? @db.VarChar(255)
+  id_token          String? @db.Text
+  session_state     String? @db.VarChar(255)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("Accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid()) @map("session_id")
+  sessionToken String   @unique @map("session_token") @db.VarChar(255)
+  userId       Int      @map("user_id")
+  expires      DateTime
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("Sessions")
+}
+
+model VerificationToken {
+  identifier String   @db.VarChar(255)
+  token      String   @unique @db.VarChar(255)
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("Verification_Tokens")
+}
+
 model User {
   id               Int              @id @default(autoincrement()) @map("user_id")
   email            String           @unique @db.VarChar(255)
-  passwordHash     String           @map("password_hash") @db.VarChar(255)
+  passwordHash     String?          @map("password_hash") @db.VarChar(255)
   roleId           Int              @map("role_id")
   fullName         String           @map("full_name") @db.VarChar(100)
   profilePictureUrl String?          @map("profile_picture_url") @db.VarChar(255)
@@ -41,6 +83,8 @@ model User {
   updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at")
   
   // Relations
+  accounts         Account[]
+  sessions         Session[]
   role             Role             @relation(fields: [roleId], references: [id])
   courses          Course[]
   enrollments      Enrollment[]
@@ -209,11 +253,13 @@ model Payment {
   @@index([transactionId])
   @@map("Payments")
 }
+
 enum PaymentStatus {
   pending
   paid
   failed
 }
+
 enum TransactionStatus {
   pending
   completed
