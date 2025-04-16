@@ -4,9 +4,16 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import { LucideHome, LucideBook, LucideUsers, LucideBarChart2, LucideLogOut } from "lucide-react";
+import { 
+  LucideHome, 
+  LucideUsers, 
+  LucideBookOpen, 
+  LucideSettings, 
+  LucideBarChart2, 
+  LucideLogOut 
+} from "lucide-react";
 
-export default function DashboardLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,12 +24,13 @@ export default function DashboardLayout({
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
+    } else if (status === "authenticated" && session?.user.role !== "ADMIN") {
+      router.push("/dashboard");
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/' });
-    router.push("/");
   };
 
   if (status === "loading") {
@@ -33,20 +41,34 @@ export default function DashboardLayout({
     );
   }
 
+  if (status === "authenticated" && session?.user.role !== "ADMIN") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Accès refusé</h1>
+          <p className="mb-4">Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+          <Link href="/dashboard" className="text-blue-600 hover:underline">
+            Retourner au tableau de bord
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
       <aside className="w-64 bg-gray-800 dark:bg-gray-950 text-white">
         <div className="p-6">
-          <Link href="/dashboard" className="text-xl font-bold">
-            LearnPro
+          <Link href="/admin/dashboard" className="text-xl font-bold">
+            LearnPro Admin
           </Link>
         </div>
         <nav className="mt-6">
           <ul>
             <li>
               <Link
-                href="/dashboard"
+                href="/admin/dashboard"
                 className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 <LucideHome className="w-5 h-5 mr-3" />
@@ -55,29 +77,38 @@ export default function DashboardLayout({
             </li>
             <li>
               <Link
-                href="/dashboard/cours"
-                className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
-                <LucideBook className="w-5 h-5 mr-3" />
-                <span>Mes cours</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/dashboard/groupes"
+                href="/admin/dashboard/users"
                 className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 <LucideUsers className="w-5 h-5 mr-3" />
-                <span>Mes groupes</span>
+                <span>Utilisateurs</span>
               </Link>
             </li>
             <li>
               <Link
-                href="/dashboard/analytiques"
+                href="/admin/dashboard/courses"
+                className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                <LucideBookOpen className="w-5 h-5 mr-3" />
+                <span>Cours</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/dashboard/analytics"
                 className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 <LucideBarChart2 className="w-5 h-5 mr-3" />
                 <span>Analytiques</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/dashboard/settings"
+                className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                <LucideSettings className="w-5 h-5 mr-3" />
+                <span>Paramètres</span>
               </Link>
             </li>
           </ul>

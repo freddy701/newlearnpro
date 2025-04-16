@@ -19,6 +19,9 @@ export default async function middleware(req: NextRequestWithAuth) {
   // Path for dashboard (requires authentication)
   const isDashboardPath = req.nextUrl.pathname.startsWith("/dashboard");
   
+  // Path for admin dashboard
+  const isAdminPath = req.nextUrl.pathname.startsWith("/admin");
+  
   // Path for contact form (accessible to authenticated users)
   const isContactPath = req.nextUrl.pathname === "/contact/become-teacher";
 
@@ -29,13 +32,24 @@ export default async function middleware(req: NextRequestWithAuth) {
 
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && (req.nextUrl.pathname === "/auth/login" || req.nextUrl.pathname === "/auth/register")) {
-    // Redirect to dashboard
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    // Redirect based on user role
+    if (token.role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    } else {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
   }
 
   // Protect teacher routes - only teachers and admins can access
   if (isTeacherPath && isAuthenticated) {
     if (token.role !== "TEACHER" && token.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+  
+  // Protect admin routes - only admins can access
+  if (isAdminPath && isAuthenticated) {
+    if (token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }
