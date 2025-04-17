@@ -35,6 +35,8 @@ export default async function middleware(req: NextRequestWithAuth) {
     // Redirect based on user role
     if (token.role === "ADMIN") {
       return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    } else if (token.role === "TEACHER") {
+      return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
     } else {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
@@ -51,6 +53,15 @@ export default async function middleware(req: NextRequestWithAuth) {
   if (isAdminPath && isAuthenticated) {
     if (token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+  
+  // Redirect users to their appropriate dashboard based on role
+  if (isAuthenticated && req.nextUrl.pathname === "/dashboard") {
+    if (token.role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    } else if (token.role === "TEACHER") {
+      return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
     }
   }
 
