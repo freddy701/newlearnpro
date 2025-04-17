@@ -4,19 +4,17 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LucidePlus, LucideSearch, LucideEdit, LucideTrash, LucideEye } from "lucide-react";
-
-// Types pour les cours
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  thumbnailUrl: string;
-  price: number;
-  isPublished: boolean;
-  studentsCount: number;
-  createdAt: string;
-}
+import { 
+  LucidePlus, 
+  LucideEdit, 
+  LucideTrash, 
+  LucideEye, 
+  LucideUsers,
+  LucideSearch,
+  LucideCheck,
+  LucideX
+} from "lucide-react";
+import { CourseService, Course } from "@/services/courseService";
 
 export default function TeacherCoursesPage() {
   const { data: session, status } = useSession();
@@ -24,46 +22,28 @@ export default function TeacherCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState<number | null>(null);
 
-  // Simuler la récupération des cours de l'enseignant
+  // Charger les cours de l'enseignant
   useEffect(() => {
-    // Dans un environnement de production, vous feriez un appel API pour récupérer les cours
-    const mockCourses: Course[] = [
-      {
-        id: 1,
-        title: "Introduction au développement web",
-        description: "Apprenez les bases du développement web...",
-        thumbnailUrl: "/images/code-bg.jpg",
-        price: 49.99,
-        isPublished: true,
-        studentsCount: 24,
-        createdAt: "2025-01-15"
-      },
-      {
-        id: 2,
-        title: "JavaScript moderne",
-        description: "Maîtrisez JavaScript et ses frameworks modernes",
-        thumbnailUrl: "/images/javascript-bg.jpg",
-        price: 59.99,
-        isPublished: true,
-        studentsCount: 18,
-        createdAt: "2025-02-20"
-      },
-      {
-        id: 3,
-        title: "Python pour la data science",
-        description: "Explorez l'analyse de données avec Python",
-        thumbnailUrl: "/images/python-bg.jpg",
-        price: 69.99,
-        isPublished: false,
-        studentsCount: 0,
-        createdAt: "2025-03-10"
+    const loadCourses = async () => {
+      if (status === "authenticated" && session?.user.id) {
+        try {
+          setIsLoading(true);
+          const response = await CourseService.getTeacherCourses(parseInt(session.user.id));
+          setCourses(response.courses);
+        } catch (error) {
+          console.error("Erreur lors du chargement des cours:", error);
+          setError("Impossible de charger vos cours. Veuillez réessayer plus tard.");
+        } finally {
+          setIsLoading(false);
+        }
       }
-    ];
+    };
 
-    setCourses(mockCourses);
-    setIsLoading(false);
-  }, []);
+    loadCourses();
+  }, [session, status]);
 
   // Filtrer les cours en fonction de la recherche
   const filteredCourses = courses.filter(course => 
@@ -71,9 +51,31 @@ export default function TeacherCoursesPage() {
   );
 
   // Supprimer un cours
-  const deleteCourse = (courseId: number) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce cours ?")) {
+  const deleteCourse = async (courseId: number) => {
+    try {
+      await CourseService.deleteCourse(courseId);
       setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+      setDeleteConfirmation(null);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du cours:", error);
+      setError("Impossible de supprimer ce cours. Veuillez réessayer plus tard.");
+    }
+  };
+
+  // Changer le statut de publication d'un cours
+  const togglePublishStatus = async (courseId: number, currentStatus: boolean) => {
+    try {
+      await CourseService.togglePublishStatus(courseId, !currentStatus);
+      setCourses(prevCourses => 
+        prevCourses.map(course => 
+          course.id === courseId 
+            ? { ...course, isPublished: !currentStatus } 
+            : course
+        )
+      );
+    } catch (error) {
+      console.error("Erreur lors du changement de statut du cours:", error);
+      setError("Impossible de modifier le statut de ce cours. Veuillez réessayer plus tard.");
     }
   };
 
@@ -107,24 +109,30 @@ export default function TeacherCoursesPage() {
             <LucideSearch className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
           
-          <Link 
-            href="/teacher/courses/create" 
+          <Link
+            href="/teacher/courses/create"
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <LucidePlus className="h-5 w-5 mr-2" />
-            Créer un nouveau cours
+            Créer un cours
           </Link>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
+          <p className="text-red-700 dark:text-red-300">{error}</p>
+        </div>
+      )}
 
       {filteredCourses.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
           <h2 className="text-xl font-semibold mb-4">Vous n'avez pas encore créé de cours</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Commencez par créer votre premier cours pour partager vos connaissances avec vos étudiants.
+            Commencez à créer votre premier cours pour partager vos connaissances avec vos étudiants.
           </p>
-          <Link 
-            href="/teacher/courses/create" 
+          <Link
+            href="/teacher/courses/create"
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <LucidePlus className="h-5 w-5 mr-2" />
@@ -132,68 +140,97 @@ export default function TeacherCoursesPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course) => (
             <div key={course.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-64 h-48 md:h-auto">
-                  <img 
-                    src={course.thumbnailUrl} 
-                    alt={course.title} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://via.placeholder.com/640x360?text=Image+non+disponible";
-                    }}
-                  />
+              {/* Affichage de la miniature du cours */}
+              {course.thumbnailUrl ? (
+                <img
+                  src={`/images/${course.thumbnailUrl}`}
+                  alt={`Miniature du cours ${course.title}`}
+                  className="w-full h-32 object-cover rounded mb-2"
+                />
+              ) : (
+                <div className="w-full h-32 bg-gray-200 flex items-center justify-center rounded mb-2 text-gray-400 text-sm">
+                  Pas d'image
                 </div>
-                <div className="flex-1 p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">{course.description}</p>
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <span className="mr-4">Prix: {course.price.toFixed(2)}€</span>
-                        <span className="mr-4">Étudiants: {course.studentsCount}</span>
-                        <span>Créé le: {course.createdAt}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <div className="mb-4">
-                        {course.isPublished ? (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs font-semibold rounded-full">
-                            Publié
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs font-semibold rounded-full">
-                            Brouillon
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex space-x-2">
-                        <Link 
-                          href={`/teacher/courses/${course.id}`}
-                          className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                          title="Voir"
-                        >
-                          <LucideEye className="h-5 w-5" />
-                        </Link>
-                        <Link 
-                          href={`/teacher/courses/${course.id}/edit`}
-                          className="p-2 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
-                          title="Modifier"
-                        >
-                          <LucideEdit className="h-5 w-5" />
-                        </Link>
-                        <button 
+              )}
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-lg truncate">{course.title}</h3>
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center mr-4">
+                    <LucideUsers className="h-4 w-4 mr-1" />
+                    {course.studentsCount || 0} étudiants
+                  </div>
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    {course.lessonsCount || 0} leçons
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                  {course.description || "Aucune description"}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold">{typeof course.price === 'number' ? course.price.toFixed(2) : course.price}€</span>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => togglePublishStatus(course.id, course.isPublished)}
+                      className={`p-2 rounded-full ${
+                        course.isPublished
+                          ? 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30'
+                          : 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30'
+                      }`}
+                      title={course.isPublished ? "Dépublier" : "Publier"}
+                    >
+                      {course.isPublished ? <LucideX className="h-5 w-5" /> : <LucideCheck className="h-5 w-5" />}
+                    </button>
+                    
+                    <Link
+                      href={`/teacher/courses/${course.id}`}
+                      className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-full"
+                      title="Voir le cours"
+                    >
+                      <LucideEye className="h-5 w-5" />
+                    </Link>
+                    
+                    <Link
+                      href={`/teacher/courses/${course.id}/edit`}
+                      className="p-2 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-full"
+                      title="Modifier le cours"
+                    >
+                      <LucideEdit className="h-5 w-5" />
+                    </Link>
+                    
+                    {deleteConfirmation === course.id ? (
+                      <div className="flex items-center space-x-1">
+                        <button
                           onClick={() => deleteCourse(course.id)}
-                          className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                          title="Supprimer"
+                          className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full"
+                          title="Confirmer la suppression"
                         >
-                          <LucideTrash className="h-5 w-5" />
+                          <LucideCheck className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmation(null)}
+                          className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                          title="Annuler"
+                        >
+                          <LucideX className="h-5 w-5" />
                         </button>
                       </div>
-                    </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeleteConfirmation(course.id)}
+                        className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full"
+                        title="Supprimer le cours"
+                      >
+                        <LucideTrash className="h-5 w-5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

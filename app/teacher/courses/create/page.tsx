@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LucideArrowLeft, LucideUpload, LucidePlus, LucideTrash, LucideCheck } from "lucide-react";
+import { LucideArrowLeft, LucideUpload, LucidePlus, LucideTrash, LucideCheck, LucideLoader2 } from "lucide-react";
+import { CourseService } from "@/services/courseService";
 
 export default function CreateCoursePage() {
   const { data: session, status } = useSession();
@@ -22,6 +23,7 @@ export default function CreateCoursePage() {
   const [quizzes, setQuizzes] = useState<{ lessonIndex: number; question: string; options: string[]; correctAnswer: string }[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [error, setError] = useState("");
 
   // Gérer les changements dans le formulaire du cours
   const handleCourseChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -112,23 +114,80 @@ export default function CreateCoursePage() {
   };
 
   // Soumettre le formulaire
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsLoading(true);
-    
+    setError("");
+
     try {
-      // Dans un environnement de production, vous feriez un appel API pour créer le cours
-      console.log("Données du cours:", courseData);
-      console.log("Leçons:", lessons);
-      console.log("Quizzes:", quizzes);
+      // Validation du formulaire
+      if (!validateCourseForm()) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Créer le cours avec les données du formulaire
+      const courseForm = {
+        title: courseData.title,
+        description: courseData.description,
+        thumbnailUrl: courseData.thumbnailUrl,
+        price: parseFloat(courseData.price),
+      };
+
+      // Appeler l'API pour créer le cours
+      const response = await CourseService.createCourse(courseForm);
       
-      // Simuler un délai pour l'appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Rediriger vers la liste des cours
-      router.push("/teacher/courses");
+      // Si le cours est créé avec succès, ajouter les leçons
+      if (response.course && response.course.id) {
+        const courseId = response.course.id;
+        
+        // Ajouter les leçons une par une
+        for (const lesson of lessons) {
+          await fetch(`/api/courses/${courseId}/lessons`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title: lesson.title,
+              videoUrl: lesson.videoUrl,
+              duration: lesson.duration,
+            }),
+          });
+        }
+        
+        // Ajouter les quiz si nécessaire
+        for (const quiz of quizzes) {
+          // Trouver l'index de la leçon associée
+          const lessonIndex = quiz.lessonIndex;
+          
+          // Récupérer toutes les leçons du cours
+          const lessonsResponse = await fetch(`/api/courses/${courseId}/lessons`);
+          const courseLessons = await lessonsResponse.json();
+          
+          // Si la leçon existe, ajouter le quiz
+          if (courseLessons && courseLessons.length > lessonIndex) {
+            const lessonId = courseLessons[lessonIndex].id;
+            
+            await fetch(`/api/courses/${courseId}/lessons/${lessonId}/quiz`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                question: quiz.question,
+                options: quiz.options,
+                correctAnswer: quiz.correctAnswer,
+              }),
+            });
+          }
+        }
+        
+        // Rediriger vers la page des cours de l'enseignant
+        router.push("/teacher/courses");
+      }
     } catch (error) {
       console.error("Erreur lors de la création du cours:", error);
+      setError(error instanceof Error ? error.message : "Une erreur est survenue lors de la création du cours");
     } finally {
       setIsLoading(false);
     }
