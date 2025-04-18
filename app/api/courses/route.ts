@@ -13,9 +13,11 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(url.searchParams.get("limit") || "10");
     const page = parseInt(url.searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
+    const query = url.searchParams.get("query")?.toLowerCase() || "";
+    const isPublished = url.searchParams.get("isPublished");
 
     // Construire la requête de base
-    const baseQuery = {
+    const baseQuery: any = {
       where: {
         ...(teacherId ? { teacherId: parseInt(teacherId) } : {}),
       },
@@ -45,12 +47,23 @@ export async function GET(req: NextRequest) {
       take: limit,
     };
 
+    // Filtre isPublished
+    if (isPublished === "true") {
+      baseQuery.where.isPublished = true;
+    }
+
+    // Filtre recherche query (titre ou description)
+    if (query) {
+      baseQuery.where.OR = [
+        { title: { contains: query, mode: "insensitive" } },
+        { description: { contains: query, mode: "insensitive" } },
+      ];
+    }
+
     // Exécuter la requête
     const [courses, totalCourses] = await Promise.all([
       prisma.course.findMany(baseQuery),
-      prisma.course.count({
-        where: baseQuery.where,
-      }),
+      prisma.course.count({ where: baseQuery.where }),
     ]);
 
     // Transformer les données pour le client
@@ -62,8 +75,8 @@ export async function GET(req: NextRequest) {
       price: course.price,
       isPublished: course.isPublished,
       teacher: course.teacher,
-      lessonsCount: course.lessons.length,
-      studentsCount: course._count.enrollments,
+      lessonsCount: course.lessons?.length || 0,
+      studentsCount: course._count?.enrollments || 0,
       createdAt: course.createdAt,
     }));
 

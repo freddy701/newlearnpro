@@ -31,8 +31,20 @@ export default function LoginPage() {
         return;
       }
 
+      // On va chercher le rôle de l'utilisateur pour rediriger dynamiquement
+      // On suppose que le backend NextAuth renvoie le rôle dans la session
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+      const userRole = session?.user?.role;
+
+      if (userRole === "STUDENT") {
+        router.push("/student/dashboard");
+      } else if (userRole === "TEACHER") {
+        router.push("/teacher/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
-      router.push("/dashboard");
     } catch (error) {
       setError("Une erreur est survenue. Veuillez réessayer.");
       setIsLoading(false);
@@ -42,7 +54,8 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      // Après Google login, NextAuth callback redirige vers /dashboard, on corrige pour faire la redirection dynamique côté client
+      await signIn("google", { callbackUrl: "/auth/post-login-redirect" });
     } catch (error) {
       setError("Une erreur est survenue avec la connexion Google.");
       setIsGoogleLoading(false);

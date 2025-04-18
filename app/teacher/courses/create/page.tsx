@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LucideArrowLeft, LucideUpload, LucidePlus, LucideTrash, LucideCheck, LucideLoader2 } from "lucide-react";
 import { CourseService } from "@/services/courseService";
+import Toast from "@/components/ui/Toast";
 
 export default function CreateCoursePage() {
   const { data: session, status } = useSession();
@@ -24,6 +25,29 @@ export default function CreateCoursePage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error"; visible: boolean }>({ message: "", type: "success", visible: false });
+
+  // Afficher le toast
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type, visible: true });
+  };
+
+  // Afficher le toast et rediriger après fermeture
+  const showToastAndRedirect = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type, visible: true });
+    // La redirection sera déclenchée dans closeToast si succès
+  };
+
+  // Fermer le toast
+  const closeToast = () => {
+    setToast((t) => {
+      // Si c'était un succès, on redirige après fermeture
+      if (t.type === "success" && t.visible) {
+        router.push("/teacher/courses");
+      }
+      return { ...t, visible: false };
+    });
+  };
 
   // Gérer les changements dans le formulaire du cours
   const handleCourseChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -181,13 +205,13 @@ export default function CreateCoursePage() {
             });
           }
         }
-        
-        // Rediriger vers la page des cours de l'enseignant
-        router.push("/teacher/courses");
+        // Afficher le toast de succès et rediriger après fermeture
+        showToastAndRedirect("Cours créé avec succès !", "success");
       }
     } catch (error) {
       console.error("Erreur lors de la création du cours:", error);
       setError(error instanceof Error ? error.message : "Une erreur est survenue lors de la création du cours");
+      setToast({ message: "Erreur lors de la création du cours", type: "error", visible: true });
     } finally {
       setIsLoading(false);
     }
@@ -208,6 +232,7 @@ export default function CreateCoursePage() {
 
   return (
     <div className="p-6">
+      <Toast message={toast.message} type={toast.type} visible={toast.visible} onClose={closeToast} />
       <div className="flex items-center mb-8">
         <Link href="/teacher/courses" className="mr-4">
           <LucideArrowLeft className="h-5 w-5 text-gray-500 hover:text-gray-700" />
