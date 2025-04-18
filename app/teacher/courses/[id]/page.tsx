@@ -399,85 +399,50 @@ export default function CourseDetailsPage({ params }: { params: { id: string } }
                     {lesson.hasQuiz ? (
                       <Link
                         href={`/teacher/courses/${courseId}/lessons/${lesson.id}/quiz`}
-                        className="p-2 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-full"
-                        title="Modifier le quiz"
+                        className="flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 text-xs"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <LucideCheck className="h-4 w-4 mr-1" /> Quiz
                       </Link>
                     ) : (
                       <Link
-                        href={`/teacher/courses/${courseId}/lessons/${lesson.id}/quiz/create`}
-                        className="p-2 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-full"
-                        title="Ajouter un quiz"
+                        href={`/teacher/courses/${courseId}/lessons/${lesson.id}/quiz`}
+                        className="flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 text-xs"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <LucidePlus className="h-4 w-4 mr-1" /> Ajouter un quiz
                       </Link>
                     )}
-                    
+                    <Link
+                      href={`/teacher/courses/${courseId}/lessons/${lesson.id}`}
+                      className="flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-xs"
+                    >
+                      <LucideEye className="h-4 w-4 mr-1" /> Voir
+                    </Link>
                     <Link
                       href={`/teacher/courses/${courseId}/lessons/${lesson.id}/edit`}
-                      className="p-2 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-full"
-                      title="Modifier la leçon"
+                      className="flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-xs"
                     >
-                      <LucideEdit className="h-5 w-5" />
+                      <LucideEdit className="h-4 w-4 mr-1" /> Modifier
                     </Link>
-                    
+                    <button
+                      onClick={() => setDeleteConfirmation(lesson.id)}
+                      className="flex items-center px-2 py-1 bg-red-100 text-red-800 rounded hover:bg-red-200 text-xs"
+                    >
+                      <LucideTrash className="h-4 w-4 mr-1" /> Supprimer
+                    </button>
                     <button
                       onClick={() => moveLesson(lesson.id, 'up')}
+                      className="flex items-center px-1 py-1 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-xs"
                       disabled={index === 0}
-                      className={`p-2 ${
-                        index === 0
-                          ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                          : 'text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                      } rounded-full`}
-                      title="Déplacer vers le haut"
                     >
-                      <LucideArrowUp className="h-5 w-5" />
+                      <LucideArrowUp className="h-4 w-4" />
                     </button>
-                    
                     <button
                       onClick={() => moveLesson(lesson.id, 'down')}
+                      className="flex items-center px-1 py-1 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-xs"
                       disabled={index === lessons.length - 1}
-                      className={`p-2 ${
-                        index === lessons.length - 1
-                          ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                          : 'text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                      } rounded-full`}
-                      title="Déplacer vers le bas"
                     >
-                      <LucideArrowDown className="h-5 w-5" />
+                      <LucideArrowDown className="h-4 w-4" />
                     </button>
-                    
-                    {deleteConfirmation === lesson.id ? (
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={() => deleteLesson(lesson.id)}
-                          className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full"
-                          title="Confirmer la suppression"
-                        >
-                          <LucideCheck className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmation(null)}
-                          className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-                          title="Annuler"
-                        >
-                          <LucideX className="h-5 w-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setDeleteConfirmation(lesson.id)}
-                        className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full"
-                        title="Supprimer la leçon"
-                      >
-                        <LucideTrash className="h-5 w-5" />
-                      </button>
-                    )}
                   </div>
                 </div>
               ))}

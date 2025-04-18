@@ -54,11 +54,17 @@ export default function StudentLessonDetail() {
       <div className="mb-4 text-gray-500">Durée : {lesson.duration} min</div>
       <div className="prose mb-8" dangerouslySetInnerHTML={{ __html: lesson.content }} />
       {lesson.quiz && (
-        <div className="mt-8 p-4 bg-blue-50 rounded">
+        <div className="mt-8 p-4 bg-blue-50 rounded flex items-center gap-4">
           <span className="font-semibold text-blue-700">Quiz disponible pour cette leçon</span>
+          <Link
+            href={`/student/courses/${params.id}/lessons/${params.lessonId}/quiz`}
+            className="ml-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+          >
+            Faire le quiz
+          </Link>
         </div>
       )}
-      <Link href={`/student/courses/${params.id}`} className="text-blue-600 hover:underline">← Retour au cours</Link>
+      <Link href={`/student/courses/${params.id}`} className="text-blue-600 hover:underline mt-6 block">← Retour au cours</Link>
     </div>
   );
 }

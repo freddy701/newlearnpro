@@ -8,11 +8,12 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // GET /api/courses/[id]/lessons/[lessonId] - Récupérer une leçon spécifique
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string; lessonId: string } }
+  context: { params: { id: string; lessonId: string } }
 ) {
+  const params = await context.params;
   try {
-    const courseId = parseInt(params.id);
-    const lessonId = parseInt(params.lessonId);
+    const courseId = params.id ? parseInt(params.id as string, 10) : NaN;
+    const lessonId = params.lessonId ? parseInt(params.lessonId as string, 10) : NaN;
 
     if (isNaN(courseId) || isNaN(lessonId)) {
       return NextResponse.json(

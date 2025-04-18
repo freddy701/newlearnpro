@@ -27,6 +27,7 @@ export default function EditLessonPage({
   const [lessonForm, setLessonForm] = useState({
     title: "",
     content: "",
+    videoUrl: "",
     position: "",
     duration: ""
   });
@@ -66,8 +67,15 @@ export default function EditLessonPage({
         setLessonForm({
           title: lessonData.title,
           content: lessonData.content || "",
-          position: lessonData.position.toString(),
-          duration: lessonData.duration || ""
+          videoUrl: lessonData.videoUrl || "",
+          position:
+            lessonData.position !== undefined && lessonData.position !== null
+              ? lessonData.position.toString()
+              : "",
+          duration:
+            lessonData.duration !== undefined && lessonData.duration !== null
+              ? lessonData.duration.toString()
+              : ""
         });
       } catch (error) {
         console.error("Erreur lors du chargement de la leçon:", error);
@@ -104,6 +112,9 @@ export default function EditLessonPage({
     if (!lessonForm.title.trim()) {
       newErrors.title = "Le titre est obligatoire";
     }
+    if (!lessonForm.videoUrl.trim()) {
+      newErrors.videoUrl = "L'URL de la vidéo est obligatoire";
+    }
     
     if (!lessonForm.position.trim()) {
       newErrors.position = "La position est obligatoire";
@@ -135,6 +146,7 @@ export default function EditLessonPage({
       const response = await LessonService.updateLesson(courseId, lessonId, {
         title: lessonForm.title,
         content: lessonForm.content,
+        videoUrl: lessonForm.videoUrl,
         position: parseInt(lessonForm.position),
         duration: lessonForm.duration ? parseInt(lessonForm.duration) : null
       });
@@ -229,6 +241,26 @@ export default function EditLessonPage({
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Vous pouvez utiliser du HTML pour formater le contenu.
             </p>
+          </div>
+
+          <div>
+            <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              URL de la vidéo <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="videoUrl"
+              name="videoUrl"
+              type="text"
+              value={lessonForm.videoUrl}
+              onChange={handleChange}
+              className={`block w-full rounded-md border ${
+                errors.videoUrl ? 'border-red-300 dark:border-red-700' : 'border-gray-300 dark:border-gray-600'
+              } px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+              placeholder="Ex: https://www.youtube.com/watch?v=xxxx"
+            />
+            {errors.videoUrl && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.videoUrl}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

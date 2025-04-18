@@ -32,6 +32,16 @@ export default function LessonPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Fonction utilitaire pour générer l'URL d'intégration
+  const getEmbedUrl = (url: string) => {
+    // Pour YouTube
+    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+    return url;
+  };
+
   // Charger les détails du cours, de la leçon et du quiz
   useEffect(() => {
     const loadData = async () => {
@@ -153,6 +163,17 @@ export default function LessonPage({
             <div className="prose dark:prose-invert max-w-none">
               {lesson.content ? (
                 <div dangerouslySetInnerHTML={{ __html: lesson.content }} />
+              ) : lesson.videoUrl ? (
+                <div className="aspect-video mb-4">
+                  <iframe
+                    src={getEmbedUrl(lesson.videoUrl)}
+                    title="Vidéo de la leçon"
+                    className="w-full h-full rounded"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
               ) : (
                 <p className="text-gray-500 dark:text-gray-400 italic">
                   Aucun contenu disponible pour cette leçon.
@@ -188,6 +209,31 @@ export default function LessonPage({
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Section Quiz */}
+          <div className="mt-8">
+            {quiz ? (
+              <div className="flex items-center gap-4 bg-green-50 p-4 rounded">
+                <span className="text-green-700 font-semibold">Quiz associé à cette leçon</span>
+                <Link
+                  href={`/teacher/courses/${courseId}/lessons/${lessonId}/quiz`}
+                  className="ml-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+                >
+                  Modifier le quiz
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4 bg-yellow-50 p-4 rounded">
+                <span className="text-yellow-700 font-semibold">Aucun quiz n'est associé à cette leçon</span>
+                <Link
+                  href={`/teacher/courses/${courseId}/lessons/${lessonId}/quiz`}
+                  className="ml-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+                >
+                  Créer le quiz
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Quiz associé */}
