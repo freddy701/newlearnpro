@@ -64,7 +64,11 @@ export default function QuizPage({
           setQuiz(quizData);
           setQuizForm({
             question: quizData.question,
-            options: Array.isArray(quizData.options) ? quizData.options : JSON.parse(quizData.options as unknown as string),
+            options: Array.isArray(quizData.options)
+              ? quizData.options
+              : quizData.options
+                ? JSON.parse(quizData.options as unknown as string)
+                : [],
             correctAnswer: quizData.correctAnswer
           });
         }

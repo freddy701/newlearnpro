@@ -70,7 +70,7 @@ export default function StudentQuizPage() {
       {submitted ? (
         <div className="mb-8">
           <div className="text-lg font-semibold text-green-700 mb-2">Votre score : {score} / {quiz.length}</div>
-          <button className="text-blue-600 hover:underline" onClick={() => { setSubmitted(false); setScore(null); }}>Recommencer</button>
+          <Link href={`/student/courses/${params.id}`} className="text-blue-600 hover:underline mt-4 block">← Retour au cours</Link>
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
@@ -106,7 +106,7 @@ export default function StudentQuizPage() {
         </form>
       )}
       <div className="mt-8">
-        <Link href={`/student/courses/${params.id}/lessons/${params.lessonId}`} className="text-blue-600 hover:underline">← Retour à la leçon</Link>
+        {!submitted && <Link href={`/student/courses/${params.id}/lessons/${params.lessonId}`} className="text-blue-600 hover:underline">← Retour à la leçon</Link>}
       </div>
     </div>
   );

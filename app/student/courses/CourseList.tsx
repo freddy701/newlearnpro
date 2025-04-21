@@ -69,6 +69,18 @@ export default function CourseList({ initialCourses, initialMeta }: CourseListPr
           ) : (
             courses.map(course => (
               <div key={course.id} className="bg-white shadow rounded-lg p-5 flex flex-col">
+                {/* Miniature du cours */}
+                <div className="mb-3 w-full aspect-video bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+                  {course.thumbnailUrl ? (
+                    <img
+                      src={`/images/${course.thumbnailUrl}`}
+                      alt={course.title}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <span className="text-gray-400">Pas d'image</span>
+                  )}
+                </div>
                 <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
                 <p className="text-gray-700 mb-2 line-clamp-3">{course.description}</p>
                 <div className="flex items-center text-sm text-gray-500 mb-2">

@@ -21,7 +21,14 @@ export async function GET(req: NextRequest) {
       where: {
         ...(teacherId ? { teacherId: parseInt(teacherId) } : {}),
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        thumbnailUrl: true,
+        price: true,
+        isPublished: true,
+        createdAt: true,
         teacher: {
           select: {
             id: true,

@@ -65,7 +65,19 @@ export default function LessonPage({
         // Vérifier si un quiz existe pour cette leçon
         try {
           const quizData = await QuizService.getQuiz(courseId, lessonId);
-          setQuiz(quizData);
+          let safeQuizData = quizData;
+          if (quizData && quizData.options && !Array.isArray(quizData.options)) {
+            try {
+              safeQuizData.options = quizData.options
+                ? JSON.parse(quizData.options as unknown as string)
+                : [];
+            } catch (e) {
+              safeQuizData.options = [];
+            }
+          } else if (quizData && !quizData.options) {
+            safeQuizData.options = [];
+          }
+          setQuiz(safeQuizData);
         } catch (error) {
           // C'est normal si le quiz n'existe pas encore
           console.log("Aucun quiz trouvé pour cette leçon");
