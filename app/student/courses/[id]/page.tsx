@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Course } from "@/services/courseService";
 import Link from "next/link";
+import PaymentModalContent from "@/components/PaymentModalContent" // Import the PaymentModalContent component
 
 export default function StudentCourseDetail() {
   const router = useRouter();
@@ -12,6 +13,10 @@ export default function StudentCourseDetail() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [enrollment, setEnrollment] = useState<{ paid: boolean } | null>(null);
+  const [enrollLoading, setEnrollLoading] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false); // Add the showPaymentModal state
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -32,11 +37,38 @@ export default function StudentCourseDetail() {
     fetchCourse();
   }, [params?.id]);
 
+  useEffect(() => {
+    const fetchEnrollment = async () => {
+      if (!params?.id) return;
+      setEnrollLoading(true);
+      try {
+        const res = await fetch(`/api/courses/${params.id}/enroll`, { method: 'GET' });
+        if (res.ok) {
+          const data = await res.json();
+          setEnrollment({ paid: !!data.paid });
+        } else {
+          setEnrollment({ paid: false });
+        }
+      } catch {
+        setEnrollment({ paid: false });
+      } finally {
+        setEnrollLoading(false);
+      }
+    };
+    fetchEnrollment();
+  }, [params?.id]);
+
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   function getYoutubeId(url: string) {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
     return match ? match[1] : "";
   }
+
+  // Fonction pour afficher le toast d'accès verrouillé
+  const handleLockedLessonClick = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+  };
 
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Chargement...</div>;
@@ -50,6 +82,17 @@ export default function StudentCourseDetail() {
 
   return (
     <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 flex flex-col gap-8">
+      {/* Bouton inscription en haut à droite */}
+      <div className="flex justify-end items-center mb-2">
+        {!enrollLoading && !enrollment?.paid && (
+          <button
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 shadow"
+            onClick={() => setShowPaymentModal(true)} // Open the payment modal on click
+          >
+            S’inscrire et payer
+          </button>
+        )}
+      </div>
       {/* Image du cours */}
       {/* Image supprimée des propriétés du cours */}
       <div>
@@ -86,12 +129,18 @@ export default function StudentCourseDetail() {
         <div className="md:w-1/3 w-full">
           <h2 className="text-xl font-semibold mb-2">Programme du cours</h2>
           {(course as any).lessons && (course as any).lessons.length > 0 ? (
-            <ul className="space-y-4">
+            <div className="flex flex-col gap-4">
               {(course as any).lessons.map((lesson: any, idx: number) => (
-                <li
+                <div
                   key={lesson.id}
-                  className={`flex gap-4 cursor-pointer rounded transition p-2 ${selectedLesson === idx ? "bg-blue-50" : "hover:bg-gray-100"}`}
-                  onClick={() => setSelectedLesson(idx)}
+                  className={`flex items-center gap-4 border p-2 rounded cursor-pointer ${!enrollment?.paid ? 'opacity-60 pointer-events-auto' : 'hover:bg-blue-50'}`}
+                  onClick={() => {
+                    if (!enrollment?.paid) {
+                      handleLockedLessonClick();
+                      return;
+                    }
+                    setSelectedLesson(idx);
+                  }}
                 >
                   <div className="relative w-[120px] h-[68px] flex-shrink-0 bg-gray-200 rounded overflow-hidden">
                     {lesson.videoUrl ? (
@@ -119,40 +168,69 @@ export default function StudentCourseDetail() {
                       </button>
                     )}
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
             <div className="text-gray-500">Aucune leçon disponible.</div>
           )}
         </div>
         {/* Lecteur vidéo et détails */}
-        {/* Suppression du détail de la leçon sélectionnée */}
-      </div>
-      {/* Affichage de la vidéo en grand si une leçon est sélectionnée et a une vidéo */}
-      {selectedLesson !== null && (course as any).lessons?.[selectedLesson]?.videoUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-          <div className="relative w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden">
-            <button
-              onClick={() => setSelectedLesson(null)}
-              className="absolute top-2 right-2 z-10 bg-white bg-opacity-80 rounded-full px-2 py-1 text-black hover:bg-opacity-100"
-              aria-label="Fermer la vidéo"
-            >
-              ✕
-            </button>
-            <iframe
-              src={`https://www.youtube.com/embed/${getYoutubeId((course as any).lessons[selectedLesson].videoUrl)}?autoplay=1`}
-              title={(course as any).lessons[selectedLesson].title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            ></iframe>
+        {selectedLesson !== null && (course as any).lessons?.[selectedLesson]?.videoUrl && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+            <div className="relative w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden">
+              <button
+                onClick={() => setSelectedLesson(null)}
+                className="absolute top-2 right-2 z-10 bg-white bg-opacity-80 rounded-full px-2 py-1 text-black hover:bg-opacity-100"
+                aria-label="Fermer la vidéo"
+              >
+                ✕
+              </button>
+              <iframe
+                src={`https://www.youtube.com/embed/${getYoutubeId((course as any).lessons[selectedLesson].videoUrl)}?autoplay=1`}
+                title={(course as any).lessons[selectedLesson].title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
       <div className="mt-6">
         <Link href="/student/courses" className="text-blue-600 hover:underline">← Retour à la liste des cours</Link>
       </div>
+      {/* Toast plein écran */}
+      {showToast && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-xl shadow-lg px-8 py-6 flex flex-col items-center gap-3">
+            <span className="text-5xl">🔒</span>
+            <div className="font-semibold text-lg text-center">Vous devez vous inscrire et payer ce cours<br/>pour accéder à cette leçon.</div>
+          </div>
+        </div>
+      )}
+      {/* Modale de paiement */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-lg p-0 relative w-full max-w-lg">
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl"
+              onClick={() => setShowPaymentModal(false)}
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+            <PaymentModalContent
+              courseId={params.id}
+              onSuccess={() => {
+                setShowPaymentModal(false);
+                // Rafraîchir la page pour débloquer l'accès
+                window.location.reload();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

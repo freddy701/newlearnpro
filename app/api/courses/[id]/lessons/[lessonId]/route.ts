@@ -22,6 +22,28 @@ export async function GET(
       );
     }
 
+    // Vérification de l'inscription et du paiement
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        { message: "Non autorisé" },
+        { status: 401 }
+      );
+    }
+    const enrollment = await prisma.enrollment.findFirst({
+      where: {
+        userId: session.user.id,
+        courseId: courseId,
+        paymentStatus: 'paid',
+      },
+    });
+    if (!enrollment) {
+      return NextResponse.json(
+        { accessDenied: true, message: "Vous devez vous inscrire et payer ce cours pour accéder à la leçon." },
+        { status: 403 }
+      );
+    }
+
     const lesson = await prisma.lesson.findUnique({
       where: {
         id: lessonId,

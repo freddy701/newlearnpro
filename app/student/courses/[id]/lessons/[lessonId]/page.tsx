@@ -18,6 +18,8 @@ export default function StudentLessonDetail() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [accessMessage, setAccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -26,9 +28,16 @@ export default function StudentLessonDetail() {
       setError(null);
       try {
         const res = await fetch(`/api/courses/${params.id}/lessons/${params.lessonId}`);
-        if (!res.ok) throw new Error("Erreur lors du chargement de la leçon");
-        const data = await res.json();
-        setLesson(data);
+        if (res.status === 403) {
+          const data = await res.json();
+          setAccessDenied(true);
+          setAccessMessage(data.message || "Accès refusé");
+          setLesson(null);
+        } else if (!res.ok) throw new Error("Erreur lors du chargement de la leçon");
+        else {
+          const data = await res.json();
+          setLesson(data);
+        }
       } catch (err) {
         setError("Impossible de charger la leçon.");
       } finally {
@@ -43,6 +52,14 @@ export default function StudentLessonDetail() {
   }
   if (error) {
     return <div className="text-center py-12 text-red-500">{error}</div>;
+  }
+  if (accessDenied) {
+    return (
+      <div className="text-center py-12 text-red-500">
+        <p>{accessMessage}</p>
+        <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => router.push(`/student/courses/${params.id}/enroll`)}>S’inscrire et payer</button>
+      </div>
+    );
   }
   if (!lesson) {
     return <div className="text-center py-12 text-gray-500">Leçon introuvable.</div>;
