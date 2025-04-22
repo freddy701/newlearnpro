@@ -12,6 +12,7 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetTitle,
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -125,6 +126,7 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="pr-0">
+              <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
               <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
                 <div className="flex flex-col gap-4">
                   <Link

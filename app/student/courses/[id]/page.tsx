@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Course } from "@/services/courseService";
 import Link from "next/link";
-import PaymentModalContent from "@/components/PaymentModalContent" // Import the PaymentModalContent component
+import StripePaymentModal from "@/components/StripePaymentModal" // Import the StripePaymentModal component
 
 export default function StudentCourseDetail() {
   const router = useRouter();
@@ -17,6 +17,7 @@ export default function StudentCourseDetail() {
   const [enrollLoading, setEnrollLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false); // Add the showPaymentModal state
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -68,6 +69,14 @@ export default function StudentCourseDetail() {
   const handleLockedLessonClick = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2500);
+  };
+
+  // Fonction pour afficher le toast de succès après paiement
+  const handlePaymentSuccess = async () => {
+    setShowSuccessToast(true);
+    // Rafraîchir l'état d'enrollment (et donc déverrouiller les leçons)
+    await fetchEnrollment();
+    setTimeout(() => setShowSuccessToast(false), 3000);
   };
 
   if (loading) {
@@ -209,6 +218,13 @@ export default function StudentCourseDetail() {
           </div>
         </div>
       )}
+      {/* Toast de succès paiement */}
+      {showSuccessToast && (
+        <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded flex items-center shadow-lg z-50">
+          <svg xmlns="http://www.w3.org/2000/svg" className="mr-2" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2l4 -4" /><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" /></svg>
+          Achat effectué avec succès !
+        </div>
+      )}
       {/* Modale de paiement */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
@@ -220,13 +236,11 @@ export default function StudentCourseDetail() {
             >
               ×
             </button>
-            <PaymentModalContent
-              courseId={params.id}
-              onSuccess={() => {
-                setShowPaymentModal(false);
-                // Rafraîchir la page pour débloquer l'accès
-                window.location.reload();
-              }}
+            <StripePaymentModal
+              courseId={course.id}
+              amount={course.price}
+              onClose={() => setShowPaymentModal(false)}
+              onSuccess={handlePaymentSuccess}
             />
           </div>
         </div>

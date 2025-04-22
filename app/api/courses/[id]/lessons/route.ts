@@ -11,7 +11,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const courseId = parseInt(params.id);
+    const resolvedParams = await params;
+    const courseId = parseInt(resolvedParams.id);
 
     if (isNaN(courseId)) {
       return NextResponse.json(
@@ -87,7 +88,8 @@ export async function POST(
       );
     }
 
-    const courseId = parseInt(params.id);
+    const resolvedParams = await params;
+    const courseId = parseInt(resolvedParams.id);
 
     if (isNaN(courseId)) {
       return NextResponse.json(
