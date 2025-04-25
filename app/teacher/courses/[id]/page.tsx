@@ -405,7 +405,7 @@ export default function CourseDetailsPage({ params }: { params: { id: string } }
                       </Link>
                     ) : (
                       <Link
-                        href={`/teacher/courses/${courseId}/lessons/${lesson.id}/quiz`}
+                        href={`/teacher/courses/${courseId}/lessons/${lesson.id}/quiz/create`}
                         className="flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 text-xs"
                       >
                         <LucidePlus className="h-4 w-4 mr-1" /> Ajouter un quiz

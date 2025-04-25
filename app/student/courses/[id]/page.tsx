@@ -19,6 +19,11 @@ export default function StudentCourseDetail() {
   const [showPaymentModal, setShowPaymentModal] = useState(false); // Add the showPaymentModal state
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
+  // Gestion du cas où l'ID est "my-courses" (évite les appels API invalides)
+  if (params?.id === "my-courses") {
+    return null;
+  }
+
   useEffect(() => {
     const fetchCourse = async () => {
       if (!params?.id) return;

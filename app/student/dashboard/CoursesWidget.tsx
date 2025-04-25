@@ -25,7 +25,7 @@ export default function CoursesWidget() {
         <div className="text-gray-500">Aucun cours publié pour le moment.</div>
       ) : (
         <ul className="divide-y divide-gray-100">
-          {courses.map(course => (
+          {courses.slice(0, 2).map(course => (
             <li key={course.id} className="py-2 flex flex-col gap-1">
               <span className="font-medium text-blue-700">{course.title}</span>
               <span className="text-sm text-gray-500 line-clamp-1">{course.description}</span>

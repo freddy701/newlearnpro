@@ -224,6 +224,7 @@ model Progress {
   quizScore   Int?      @map("quiz_score")
   isCompleted Boolean   @default(false) @map("is_completed")
   completedAt DateTime? @map("completed_at")
+  videoProgress Float?   @default(0) @map("video_progress")
   
   // Relations
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)

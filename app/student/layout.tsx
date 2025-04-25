@@ -61,6 +61,15 @@ export default function StudentRootLayout({ children }: { children: React.ReactN
               </li>
               <li>
                 <Link
+                  href="/student/courses/my-courses"
+                  className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  <LucideBook className="w-5 h-5 mr-3" />
+                  <span>Mes cours</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/student/groups"
                   className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white"
                 >

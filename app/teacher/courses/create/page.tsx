@@ -21,7 +21,6 @@ export default function CreateCoursePage() {
   });
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [lessons, setLessons] = useState<{ title: string; videoUrl: string; duration: string }[]>([]);
-  const [quizzes, setQuizzes] = useState<{ lessonIndex: number; question: string; options: string[]; correctAnswer: string }[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
@@ -124,11 +123,7 @@ export default function CreateCoursePage() {
         setCurrentStep(2);
       }
     } else if (currentStep === 2) {
-      if (lessons.length > 0) {
-        setCurrentStep(3);
-      } else {
-        alert("Veuillez ajouter au moins une leçon avant de continuer.");
-      }
+      handleSubmit();
     }
   };
 
@@ -179,32 +174,7 @@ export default function CreateCoursePage() {
           });
         }
         
-        // Ajouter les quiz si nécessaire
-        for (const quiz of quizzes) {
-          // Trouver l'index de la leçon associée
-          const lessonIndex = quiz.lessonIndex;
-          
-          // Récupérer toutes les leçons du cours
-          const lessonsResponse = await fetch(`/api/courses/${courseId}/lessons`);
-          const courseLessons = await lessonsResponse.json();
-          
-          // Si la leçon existe, ajouter le quiz
-          if (courseLessons && courseLessons.length > lessonIndex) {
-            const lessonId = courseLessons[lessonIndex].id;
-            
-            await fetch(`/api/courses/${courseId}/lessons/${lessonId}/quiz`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                question: quiz.question,
-                options: quiz.options,
-                correctAnswer: quiz.correctAnswer,
-              }),
-            });
-          }
-        }
+
         // Afficher le toast de succès et rediriger après fermeture
         showToastAndRedirect("Cours créé avec succès !", "success");
       }
@@ -250,17 +220,12 @@ export default function CreateCoursePage() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
               2
             </div>
-            <div className="h-1 w-24 bg-gray-200 mr-2"></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
-              3
-            </div>
           </div>
           <div className="flex">
             <div className="w-8 mr-2"></div>
             <div className="flex text-sm">
               <div className="w-24 mr-2">Informations du cours</div>
-              <div className="w-24 mr-2">Contenu du cours</div>
-              <div>Quiz</div>
+              <div className="w-24">Contenu du cours</div>
             </div>
           </div>
         </div>
@@ -395,7 +360,7 @@ export default function CreateCoursePage() {
               </button>
             </div>
           </div>
-        ) : currentStep === 2 ? (
+        ) : (
           <div>
             <h2 className="text-lg font-semibold mb-4">Contenu du cours</h2>
             
@@ -496,133 +461,6 @@ export default function CreateCoursePage() {
                 type="button"
                 onClick={goToNextStep}
                 disabled={lessons.length === 0}
-                className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Suivant
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Quiz</h2>
-            
-            {quizzes.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-600 dark:text-gray-400 mb-4">Vous n'avez pas encore ajouté de quiz à ce cours.</p>
-                <button
-                  type="button"
-                  onClick={() => setQuizzes(prev => [...prev, { lessonIndex: 0, question: "", options: ["", "", ""], correctAnswer: "" }])}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <LucidePlus className="h-5 w-5 mr-2" />
-                  Ajouter un quiz
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {quizzes.map((quiz, index) => (
-                  <div key={index} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-md font-medium">Quiz {index + 1}</h3>
-                      <button
-                        type="button"
-                        onClick={() => setQuizzes(prev => prev.filter((_, i) => i !== index))}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <LucideTrash className="h-5 w-5" />
-                      </button>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor={`quiz-question-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Question *
-                        </label>
-                        <input
-                          id={`quiz-question-${index}`}
-                          type="text"
-                          value={quiz.question}
-                          onChange={(e) => setQuizzes(prev => 
-                            prev.map((q, i) => 
-                              i === index ? { ...q, question: e.target.value } : q
-                            )
-                          )}
-                          className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                          placeholder="Ex: Qu'est-ce que HTML ?"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor={`quiz-options-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Options *
-                        </label>
-                        <div className="space-y-2">
-                          {quiz.options.map((option, i) => (
-                            <div key={i} className="flex items-center">
-                              <input
-                                id={`quiz-option-${index}-${i}`}
-                                type="text"
-                                value={option}
-                                onChange={(e) => setQuizzes(prev => 
-                                  prev.map((q, j) => 
-                                    j === index ? { ...q, options: q.options.map((o, k) => k === i ? e.target.value : o) } : q
-                                  )
-                                )}
-                                className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                                placeholder="Ex: HyperText Markup Language"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor={`quiz-correct-answer-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Réponse correcte *
-                        </label>
-                        <select
-                          id={`quiz-correct-answer-${index}`}
-                          value={quiz.correctAnswer}
-                          onChange={(e) => setQuizzes(prev => 
-                            prev.map((q, i) => 
-                              i === index ? { ...q, correctAnswer: e.target.value } : q
-                            )
-                          )}
-                          className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                        >
-                          {quiz.options.map((option, i) => (
-                            <option key={i} value={option}>{option}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                
-                <button
-                  type="button"
-                  onClick={() => setQuizzes(prev => [...prev, { lessonIndex: 0, question: "", options: ["", "", ""], correctAnswer: "" }])}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <LucidePlus className="h-5 w-5 mr-2" />
-                  Ajouter un autre quiz
-                </button>
-              </div>
-            )}
-
-            <div className="mt-6 flex justify-between">
-              <button
-                type="button"
-                onClick={goToPreviousStep}
-                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                Précédent
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isLoading || quizzes.length === 0}
                 className="inline-flex items-center px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (

@@ -36,7 +36,7 @@ export default function StudentDashboard() {
           <h2 className="text-xl font-semibold mb-4">Ma progression</h2>
           <p className="text-gray-600">Suivez votre progression et vos accomplissements.</p>
           <Link 
-            href="/student/progress" 
+            href="/student/courses/my-courses" 
             className="mt-4 inline-block text-blue-600 hover:underline"
           >
             Voir ma progression →

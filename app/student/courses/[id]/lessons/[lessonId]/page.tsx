@@ -38,6 +38,14 @@ export default function StudentLessonDetail() {
           const data = await res.json();
           setLesson(data);
         }
+        // --- AJOUT : Marquer la leçon comme commencée/complétée dynamiquement ---
+        // On notifie le backend que l'utilisateur a consulté la leçon
+        const sessionUserId = (typeof window !== "undefined") ? window.localStorage.getItem("userId") : null;
+        // On tente de récupérer l'ID utilisateur depuis la session côté client si besoin (à adapter selon ton auth)
+        fetch(`/api/students/${sessionUserId || params.userId || params.id}/lessons/${params.lessonId}/progress`, {
+          method: "POST"
+        });
+        // --------------------------------------------------
       } catch (err) {
         setError("Impossible de charger la leçon.");
       } finally {
