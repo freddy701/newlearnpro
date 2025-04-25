@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 import { useState, useEffect } from "react"
+import Image from "next/image"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -33,10 +34,10 @@ const navItems = [
     name: "Témoignages",
     href: "#testimonials",
   },
-  {
-    name: "Tarifs",
-    href: "#pricing",
-  },
+  // {
+  //   name: "Tarifs",
+  //   href: "#pricing",
+  // },
   {
     name: "Contact",
     href: "#contact",
@@ -72,36 +73,33 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        isScrolled
-          ? "bg-background/80 backdrop-blur-md shadow-sm"
-          : "bg-transparent"
+        "w-full z-30 top-0 sticky bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-border transition-all",
+        isScrolled ? "shadow-sm" : ""
       )}
     >
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6 md:gap-10">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              LearnPro
-            </span>
-          </Link>
-          <nav className="hidden md:flex gap-6">
-            {navItems.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToSection(item.href)}
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+        {/* Logo à gauche */}
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/images/logo.jpg" alt="Logo LearnPro" width={48} height={48} className="w-10 h-10 object-contain" />
+          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent select-none">LearnPro</span>
+        </Link>
+        {/* Menu centré */}
+        <ul className="hidden md:flex flex-1 justify-center gap-8">
+          {navItems.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
-                  pathname === item.href
-                    ? "text-foreground"
-                    : "text-muted-foreground"
+                  "font-medium text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 transition-colors px-2 py-1 rounded",
+                  pathname === item.href ? "text-blue-700 dark:text-blue-400" : ""
                 )}
               >
                 {item.name}
-              </button>
-            ))}
-          </nav>
-        </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {/* Actions à droite */}
         <div className="flex items-center gap-2">
           <div className="hidden md:flex items-center gap-2">
             <Link href="/auth/login">
@@ -110,63 +108,54 @@ export function Navbar() {
               </Button>
             </Link>
             <Link href="/auth/register">
-              <Button size="sm">S&apos;inscrire</Button>
+              <Button size="sm">S'inscrire</Button>
             </Link>
           </div>
           <ThemeToggle />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                aria-label="Menu"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="pr-0">
-              <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
-              <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
-                <div className="flex flex-col gap-4">
-                  <Link
-                    href="/"
-                    className="flex items-center space-x-2 mb-6"
-                  >
-                    <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                      LearnPro
-                    </span>
-                  </Link>
-                  <div className="flex flex-col gap-3">
-                    {navItems.map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          scrollToSection(item.href)
-                          document.querySelector('[data-state="open"]')?.setAttribute('data-state', 'closed')
-                        }}
-                        className="text-base font-medium transition-colors hover:text-primary"
-                      >
-                        {item.name}
-                      </button>
+          {/* Burger menu mobile */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Ouvrir le menu">
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-64">
+                <SheetTitle className="p-4 border-b border-border flex items-center gap-2">
+                  <Image src="/images/logo.jpg" alt="Logo LearnPro" width={32} height={32} className="w-8 h-8 object-contain" />
+                </SheetTitle>
+                <ScrollArea className="h-full p-4">
+                  <ul className="flex flex-col gap-4">
+                    {navItems.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "font-medium text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 transition-colors px-2 py-1 rounded block",
+                            pathname === item.href ? "text-blue-700 dark:text-blue-400" : ""
+                          )}
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
                     ))}
-                  </div>
-                  <div className="flex flex-col gap-2 mt-4">
+                  </ul>
+                  <div className="flex flex-col gap-2 mt-8">
                     <Link href="/auth/login">
                       <Button variant="ghost" className="w-full justify-start">
                         Se connecter
                       </Button>
                     </Link>
                     <Link href="/auth/register">
-                      <Button className="w-full">S&apos;inscrire</Button>
+                      <Button className="w-full">S'inscrire</Button>
                     </Link>
                   </div>
-                </div>
-              </ScrollArea>
-            </SheetContent>
-          </Sheet>
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
+      </nav>
     </header>
   )
 }

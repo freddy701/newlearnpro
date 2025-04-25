@@ -95,7 +95,7 @@ export default function StudentCourseDetail() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 flex flex-col gap-8">
+    <div className="max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 flex flex-col gap-8">
       {/* Bouton inscription en haut à droite */}
       <div className="flex justify-end items-center mb-2">
         {!enrollLoading && !enrollment?.paid && (
@@ -110,18 +110,19 @@ export default function StudentCourseDetail() {
       {/* Image du cours */}
       {/* Image supprimée des propriétés du cours */}
       <div>
-        <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
-        {course.description && <p className="text-gray-700 mb-2">{course.description}</p>}
+        <h1 className="text-3xl font-bold mb-4 dark:text-blue-400">{course.title}</h1>
+        {course.description && <p className="text-gray-700 mb-2 dark:text-gray-200">{course.description}</p>}
         {course.teacher?.fullName && (
-          <div className="mb-4">
+          <div className="mb-4 text-gray-700 dark:text-gray-200">
             <span className="font-semibold">Enseignant : </span>
             {course.teacher.fullName}
           </div>
         )}
         {typeof course.price === "number" && (
           <div className="mb-4">
-            <span className="font-semibold">Prix : </span>
-            {course.price.toFixed(2)} €
+            <span className="font-bold text-blue-600 dark:text-blue-300">
+              {course.price.toFixed(2)} €
+            </span>
           </div>
         )}
         {(course as any).lessons?.length > 0 && (
@@ -141,13 +142,13 @@ export default function StudentCourseDetail() {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Liste des leçons avec miniatures */}
         <div className="md:w-1/3 w-full">
-          <h2 className="text-xl font-semibold mb-2">Programme du cours</h2>
+          <h2 className="text-xl font-semibold mb-2 dark:text-blue-400">Programme du cours</h2>
           {(course as any).lessons && (course as any).lessons.length > 0 ? (
             <div className="flex flex-col gap-4">
               {(course as any).lessons.map((lesson: any, idx: number) => (
                 <div
                   key={lesson.id}
-                  className={`flex items-center gap-4 border p-2 rounded cursor-pointer ${!enrollment?.paid ? 'opacity-60 pointer-events-auto' : 'hover:bg-blue-50'}`}
+                  className={`flex items-center gap-4 border p-2 rounded cursor-pointer dark:bg-gray-800 ${!enrollment?.paid ? 'opacity-60 pointer-events-auto' : 'hover:bg-blue-50'}`}
                   onClick={() => {
                     if (!enrollment?.paid) {
                       handleLockedLessonClick();
@@ -168,8 +169,8 @@ export default function StudentCourseDetail() {
                     )}
                   </div>
                   <div className="flex-1 flex items-center gap-2">
-                    <span className="font-semibold text-base text-blue-800">{lesson.title}</span>
-                    <span className="text-xs text-gray-500 ml-2">{lesson.duration} min</span>
+                    <span className="font-semibold text-base text-blue-800 dark:text-blue-400">{lesson.title}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">{lesson.duration} min</span>
                     {lesson.hasQuiz && (
                       <button
                         className="text-xs text-white bg-blue-600 px-2 py-1 rounded ml-2 hover:bg-blue-700 transition"
@@ -212,14 +213,20 @@ export default function StudentCourseDetail() {
         )}
       </div>
       <div className="mt-6">
-        <Link href="/student/courses" className="text-blue-600 hover:underline">← Retour à la liste des cours</Link>
+        <Link href="/student/courses" className="text-blue-600 hover:underline dark:text-blue-400">← Retour à la liste des cours</Link>
       </div>
       {/* Toast plein écran */}
       {showToast && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-lg px-8 py-6 flex flex-col items-center gap-3">
-            <span className="text-5xl">🔒</span>
-            <div className="font-semibold text-lg text-center">Vous devez vous inscrire et payer ce cours<br/>pour accéder à cette leçon.</div>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg px-8 py-6 flex flex-col items-center gap-3">
+            <span className="text-lg font-semibold text-gray-800 dark:text-blue-200">Cours verrouillé</span>
+            <span className="text-gray-600 dark:text-gray-300">Vous devez vous inscrire et payer pour accéder à cette leçon.</span>
+            <button
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              onClick={() => setShowToast(false)}
+            >
+              Fermer
+            </button>
           </div>
         </div>
       )}

@@ -43,13 +43,13 @@ export default function MyCoursesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <div key={course.id} className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
-              <p className="text-gray-600 mb-2">{course.description}</p>
-              <Link href={`/student/courses/${course.id}`} className="text-blue-600 hover:underline">
+            <div key={course.id} className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-2 dark:text-blue-400">{course.title}</h2>
+              <p className="text-gray-600 mb-2 dark:text-gray-200">{course.description}</p>
+              <Link href={`/student/courses/${course.id}`} className="text-blue-600 hover:underline dark:text-blue-400">
                 Voir le cours
               </Link>
-              <div className="mt-2 text-sm text-gray-500">
+              <div className="mt-2 text-sm text-gray-500 dark:text-gray-300">
                 Progression : {course.progress ?? 0}%
               </div>
               {/* Affichage des leçons avec progress bar */}
@@ -58,7 +58,7 @@ export default function MyCoursesPage() {
                   {/* Infos leçon */}
                   <img src={lesson.thumbnail || "/default-thumbnail.png"} alt="thumbnail" style={{ width: 80, height: 50, objectFit: "cover", borderRadius: 6, marginRight: 16 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{lesson.title}</div>
+                    <div style={{ fontWeight: 600 }} className="dark:text-blue-300">{lesson.title}</div>
                     <div style={{ fontSize: 13, color: "#aaa" }}>{lesson.duration} min</div>
                   </div>
                   {/* Progress bar */}

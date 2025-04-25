@@ -61,7 +61,7 @@ export default function CourseList({ initialCourses, initialMeta }: CourseListPr
       {error && <div className="text-center text-red-500 mb-4">{error}</div>}
       {/* Grille des cours */}
       {loading ? (
-        <div className="text-center text-gray-500">Chargement...</div>
+        <div className="text-center text-gray-800 dark:text-gray-200">Chargement...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.length === 0 ? (
@@ -81,14 +81,14 @@ export default function CourseList({ initialCourses, initialMeta }: CourseListPr
                     <span className="text-gray-400">Pas d'image</span>
                   )}
                 </div>
-                <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
-                <p className="text-gray-700 mb-2 line-clamp-3">{course.description}</p>
-                <div className="flex items-center text-sm text-gray-500 mb-2">
+                <h2 className="text-xl font-semibold mb-2 dark:text-blue-400">{course.title}</h2>
+                <p className="text-gray-700 mb-2 line-clamp-3 dark:text-gray-200">{course.description}</p>
+                <div className="flex items-center text-sm text-gray-500 mb-2 dark:text-gray-300">
                   Enseignant : {course.teacher?.fullName || "-"}
                 </div>
                 <div className="flex justify-between items-center mt-auto">
-                  <span className="font-bold text-blue-600">{typeof course.price === "number" ? course.price.toFixed(2) : course.price} €</span>
-                  <Link href={`/student/courses/${course.id}`} className="text-blue-600 hover:underline text-sm">Voir le cours</Link>
+                  <span className="font-bold text-blue-600 dark:text-blue-300">{typeof course.price === "number" ? course.price.toFixed(2) : course.price} €</span>
+                  <Link href={`/student/courses/${course.id}`} className="text-blue-600 hover:underline text-sm dark:text-blue-400">Voir le cours</Link>
                 </div>
               </div>
             ))

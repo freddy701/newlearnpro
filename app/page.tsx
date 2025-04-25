@@ -11,8 +11,8 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section id="hero" className="py-20 md:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-white dark:from-gray-900/50 dark:to-background -z-10" />
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 items-center">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
@@ -115,7 +115,7 @@ export default function LandingPage() {
       
       {/* Features Section */}
       <section id="features" className="py-20 bg-gray-50 dark:bg-gray-900/50">
-        <div className="container px-4 md:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Fonctionnalités principales
@@ -206,349 +206,9 @@ export default function LandingPage() {
         </div>
       </section>
       
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20">
-        <div className="container px-4 md:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Tarifs simples et transparents
-            </h2>
-            <p className="mt-4 text-gray-500 dark:text-gray-400 md:text-xl max-w-3xl mx-auto">
-              Choisissez l&apos;offre qui correspond le mieux à vos besoins d&apos;apprentissage.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Basic Plan */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-2xl font-bold">Gratuit</h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">Parfait pour débuter</p>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold">0€</span>
-                  <span className="ml-1 text-gray-500 dark:text-gray-400">/mois</span>
-                </div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <ul className="space-y-4 flex-1">
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Accès à 5 cours gratuits</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Accès au forum communautaire</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Suivi de progression basique</span>
-                  </li>
-                  <li className="flex items-start text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-gray-400 mr-2 mt-0.5"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    <span>Certificats de complétion</span>
-                  </li>
-                  <li className="flex items-start text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-gray-400 mr-2 mt-0.5"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    <span>Support prioritaire</span>
-                  </li>
-                </ul>
-                <Link href="/auth/register" className="mt-8">
-                  <Button className="w-full" variant="outline">
-                    Commencer gratuitement
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            
-            {/* Pro Plan */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border-2 border-blue-600 dark:border-blue-500 overflow-hidden flex flex-col relative">
-              <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-xs font-medium">
-                Populaire
-              </div>
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-2xl font-bold">Pro</h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">Pour les apprenants sérieux</p>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold">19,99€</span>
-                  <span className="ml-1 text-gray-500 dark:text-gray-400">/mois</span>
-                </div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <ul className="space-y-4 flex-1">
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Accès illimité à tous les cours</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Certificats de complétion</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Suivi de progression avancé</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Accès aux projets pratiques</span>
-                  </li>
-                  <li className="flex items-start text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-gray-400 mr-2 mt-0.5"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    <span>Mentorat personnalisé</span>
-                  </li>
-                </ul>
-                <Link href="/auth/register" className="mt-8">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                    S&apos;abonner
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            
-            {/* Premium Plan */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-2xl font-bold">Premium</h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">Pour les professionnels</p>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold">39,99€</span>
-                  <span className="ml-1 text-gray-500 dark:text-gray-400">/mois</span>
-                </div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <ul className="space-y-4 flex-1">
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Tout ce qui est inclus dans Pro</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Mentorat personnalisé</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Accès aux webinaires exclusifs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Certification professionnelle</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Support prioritaire 24/7</span>
-                  </li>
-                </ul>
-                <Link href="/auth/register" className="mt-8">
-                  <Button className="w-full" variant="outline">
-                    S&apos;abonner
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20 bg-gray-50 dark:bg-gray-900/50">
-        <div className="container px-4 md:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Ce que disent nos apprenants
@@ -671,7 +331,7 @@ export default function LandingPage() {
       
       {/* Courses Section */}
       <section id="courses" className="py-20">
-        <div className="container px-4 md:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Nos cours populaires
@@ -694,7 +354,7 @@ export default function LandingPage() {
                   alt="Développement Web"
                   width={600}
                   height={400}
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full"
                 />
               </div>
               <div className="p-6">
@@ -743,7 +403,7 @@ export default function LandingPage() {
                   alt="Intelligence Artificielle"
                   width={600}
                   height={400}
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full"
                 />
               </div>
               <div className="p-6">
@@ -795,7 +455,7 @@ export default function LandingPage() {
                   alt="UX/UI Design"
                   width={600}
                   height={400}
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full"
                 />
               </div>
               <div className="p-6">
@@ -848,7 +508,7 @@ export default function LandingPage() {
       
       {/* Contact Section */}
       <section id="contact" className="py-20">
-        <div className="container px-4 md:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-2 items-center">
             <div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -1064,7 +724,7 @@ export default function LandingPage() {
       
       {/* Footer */}
       <footer className="bg-gray-50 dark:bg-gray-900/50 py-12 border-t border-gray-200 dark:border-gray-800">
-        <div className="container px-4 md:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">LearnPro</h3>
