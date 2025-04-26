@@ -54,7 +54,6 @@ export default function PaymentForm({ courseId, amount, onSuccess }: PaymentForm
       const { clientSecret } = await response.json();
 
       // Confirmation du paiement avec Stripe
-      // Ajoute redirect: 'if_required' pour éviter l'obligation d'un return_url
       const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
@@ -68,7 +67,7 @@ export default function PaymentForm({ courseId, amount, onSuccess }: PaymentForm
       if (onSuccess && paymentIntent?.status === "succeeded") {
         onSuccess();
       }
-
+      setProcessing(false); // <-- Toujours débloquer le bouton, succès ou non
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue lors du paiement");
       setProcessing(false);
@@ -78,13 +77,11 @@ export default function PaymentForm({ courseId, amount, onSuccess }: PaymentForm
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement />
-      
       {error && (
         <div className="p-4 bg-red-50 text-red-600 rounded-md">
           {error}
         </div>
       )}
-
       <Button
         type="submit"
         disabled={!stripe || processing}

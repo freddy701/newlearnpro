@@ -94,15 +94,6 @@ export async function GET(
       };
     }
 
-    console.log("Réponse lesson:", {
-      id: lesson.id,
-      title: lesson.title,
-      videoUrl: lesson.videoUrl,
-      duration: lesson.duration,
-      lessonOrder: lesson.lessonOrder,
-      quiz,
-    });
-
     return NextResponse.json({
       id: lesson.id,
       title: lesson.title,

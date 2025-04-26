@@ -11,9 +11,10 @@ interface StripePaymentModalProps {
   courseId: number;
   amount: number;
   onSuccess?: () => void;
+  onClose?: () => void; // Ajout d'un callback pour fermer le modal
 }
 
-export default function StripePaymentModal({ courseId, amount, onSuccess }: StripePaymentModalProps) {
+export default function StripePaymentModal({ courseId, amount, onSuccess, onClose }: StripePaymentModalProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,11 +72,17 @@ export default function StripePaymentModal({ courseId, amount, onSuccess }: Stri
     },
   };
 
+  // Handler pour succès (ferme le modal si onClose fourni)
+  const handleSuccess = () => {
+    if (onSuccess) onSuccess();
+    if (onClose) onClose();
+  };
+
   return (
-    <div className="p-6 max-w-md mx-auto">
+    <div className="p-6 max-w-md mx-auto max-h-[90vh] overflow-y-auto">
       <h2 className="text-2xl font-bold mb-4 text-center">Payer le cours</h2>
       <Elements stripe={stripePromise} options={options}>
-        <PaymentForm courseId={courseId} amount={amount} />
+        <PaymentForm courseId={courseId} amount={amount} onSuccess={handleSuccess} />
       </Elements>
     </div>
   );

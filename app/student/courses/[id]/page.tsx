@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Course } from "@/services/courseService";
 import Link from "next/link";
-import StripePaymentModal from "@/components/StripePaymentModal" // Import the StripePaymentModal component
+import StripePaymentModal from "@/components/StripePaymentModal";
+import Toast from "@/components/ui/Toast"; // Import the Toast component
 
 export default function StudentCourseDetail() {
   const router = useRouter();
@@ -16,13 +17,33 @@ export default function StudentCourseDetail() {
   const [enrollment, setEnrollment] = useState<{ paid: boolean } | null>(null);
   const [enrollLoading, setEnrollLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false); // Add the showPaymentModal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false); 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
 
   // Gestion du cas où l'ID est "my-courses" (évite les appels API invalides)
   if (params?.id === "my-courses") {
     return null;
   }
+
+  // --- Correction : Déplacement de fetchEnrollment en dehors du useEffect ---
+  const fetchEnrollment = async () => {
+    if (!params?.id) return;
+    setEnrollLoading(true);
+    try {
+      const res = await fetch(`/api/courses/${params.id}/enroll`, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        setEnrollment({ paid: !!data.paid });
+      } else {
+        setEnrollment({ paid: false });
+      }
+    } catch {
+      setEnrollment({ paid: false });
+    } finally {
+      setEnrollLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -44,27 +65,9 @@ export default function StudentCourseDetail() {
   }, [params?.id]);
 
   useEffect(() => {
-    const fetchEnrollment = async () => {
-      if (!params?.id) return;
-      setEnrollLoading(true);
-      try {
-        const res = await fetch(`/api/courses/${params.id}/enroll`, { method: 'GET' });
-        if (res.ok) {
-          const data = await res.json();
-          setEnrollment({ paid: !!data.paid });
-        } else {
-          setEnrollment({ paid: false });
-        }
-      } catch {
-        setEnrollment({ paid: false });
-      } finally {
-        setEnrollLoading(false);
-      }
-    };
     fetchEnrollment();
   }, [params?.id]);
 
-  const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   function getYoutubeId(url: string) {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
     return match ? match[1] : "";
@@ -79,8 +82,23 @@ export default function StudentCourseDetail() {
   // Fonction pour afficher le toast de succès après paiement
   const handlePaymentSuccess = async () => {
     setShowSuccessToast(true);
-    // Rafraîchir l'état d'enrollment (et donc déverrouiller les leçons)
-    await fetchEnrollment();
+
+    // Retry mechanism pour attendre la propagation du paiement côté backend
+    let attempts = 0;
+    let enrollmentUpdated = false;
+    while (attempts < 5 && !enrollmentUpdated) {
+      // On attend le résultat du fetch
+      await fetchEnrollment();
+      // On attend un tout petit délai avant de vérifier l'état (setEnrollment est async)
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      if (enrollment?.paid) {
+        enrollmentUpdated = true;
+        break;
+      }
+      attempts++;
+      await new Promise((resolve) => setTimeout(resolve, 700)); // 700ms entre chaque essai
+    }
+
     setTimeout(() => setShowSuccessToast(false), 3000);
   };
 
@@ -101,7 +119,7 @@ export default function StudentCourseDetail() {
         {!enrollLoading && !enrollment?.paid && (
           <button
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 shadow"
-            onClick={() => setShowPaymentModal(true)} // Open the payment modal on click
+            onClick={() => setShowPaymentModal(true)} 
           >
             S’inscrire et payer
           </button>
@@ -232,10 +250,12 @@ export default function StudentCourseDetail() {
       )}
       {/* Toast de succès paiement */}
       {showSuccessToast && (
-        <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded flex items-center shadow-lg z-50">
-          <svg xmlns="http://www.w3.org/2000/svg" className="mr-2" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2l4 -4" /><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" /></svg>
-          Achat effectué avec succès !
-        </div>
+        <Toast
+          message="Paiement effectué avec succès !"
+          type="success"
+          visible={showSuccessToast}
+          onClose={() => setShowSuccessToast(false)}
+        />
       )}
       {/* Modale de paiement */}
       {showPaymentModal && (
@@ -251,8 +271,8 @@ export default function StudentCourseDetail() {
             <StripePaymentModal
               courseId={course.id}
               amount={course.price}
-              onClose={() => setShowPaymentModal(false)}
               onSuccess={handlePaymentSuccess}
+              onClose={() => setShowPaymentModal(false)} // <-- Ajoute la fermeture du modal ici
             />
           </div>
         </div>
