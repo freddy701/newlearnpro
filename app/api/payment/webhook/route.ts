@@ -59,9 +59,18 @@ export async function POST(req: NextRequest) {
         amount,
         transactionId,
         status: "completed",
-        paymentMethod: "stripe",
+        paymentMethod: paymentIntent.payment_method_types[0],
       },
     });
+
+    // 3. Ajouter l'étudiant dans le groupe d'étude du cours
+    const studyGroup = await prisma.studyGroup.findFirst({ where: { courseId } });
+    if (studyGroup) {
+      const alreadyMember = await prisma.groupMember.findFirst({ where: { groupId: studyGroup.id, userId } });
+      if (!alreadyMember) {
+        await prisma.groupMember.create({ data: { groupId: studyGroup.id, userId } });
+      }
+    }
   }
 
   // Stripe attend une réponse 200 pour considérer l'événement traité

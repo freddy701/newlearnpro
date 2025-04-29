@@ -7,6 +7,7 @@ import { Course } from "@/services/courseService";
 import Link from "next/link";
 import StripePaymentModal from "@/components/StripePaymentModal";
 import Toast from "@/components/ui/Toast"; // Import the Toast component
+import StudyGroupWidget from "./StudyGroupWidget"; // Import the StudyGroupWidget component
 
 export default function StudentCourseDetail() {
   const router = useRouter();
@@ -31,10 +32,11 @@ export default function StudentCourseDetail() {
     if (!params?.id) return;
     setEnrollLoading(true);
     try {
-      const res = await fetch(`/api/courses/${params.id}/enroll`, { method: 'GET' });
+      const res = await fetch(`/api/courses/${params.id}`); // Correction ici : utilise l'API du cours avec isEnrolled
       if (res.ok) {
         const data = await res.json();
-        setEnrollment({ paid: !!data.paid });
+        setEnrollment({ paid: !!data.isEnrolled });
+        setCourse(data); // Assure la synchro du state course
       } else {
         setEnrollment({ paid: false });
       }
@@ -62,9 +64,6 @@ export default function StudentCourseDetail() {
       }
     };
     fetchCourse();
-  }, [params?.id]);
-
-  useEffect(() => {
     fetchEnrollment();
   }, [params?.id]);
 
@@ -112,6 +111,8 @@ export default function StudentCourseDetail() {
     return <div className="text-center py-12 text-gray-500">Cours introuvable.</div>;
   }
 
+  const courseId = parseInt(params.id);
+
   return (
     <div className="max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 flex flex-col gap-8">
       {/* Bouton inscription en haut à droite */}
@@ -156,11 +157,68 @@ export default function StudentCourseDetail() {
           </div>
         )}
       </div>
+      {/* Programme du cours */}
+      {(!enrollLoading && enrollment?.paid) ? (
+        <div>
+          {/* Programme du cours déverrouillé */}
+          <h2 className="text-xl font-bold mb-2 mt-8">Programme du cours</h2>
+          {(course as any).lessons && (course as any).lessons.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {(course as any).lessons.map((lesson: any, idx: number) => (
+                <div
+                  key={lesson.id}
+                  className={`flex items-center gap-4 border p-2 rounded cursor-pointer dark:bg-gray-800 ${!enrollment?.paid ? 'opacity-60 pointer-events-auto' : 'hover:bg-blue-50'}`}
+                  onClick={() => {
+                    if (!enrollment?.paid) {
+                      handleLockedLessonClick();
+                      return;
+                    }
+                    setSelectedLesson(idx);
+                  }}
+                >
+                  <div className="relative w-[120px] h-[68px] flex-shrink-0 bg-gray-200 rounded overflow-hidden">
+                    {lesson.videoUrl ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${getYoutubeId(lesson.videoUrl)}/mqdefault.jpg`}
+                        alt={lesson.title}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-xs flex items-center justify-center w-full h-full">Pas de vidéo</span>
+                    )}
+                  </div>
+                  <div className="flex-1 flex items-center gap-2">
+                    <span className="font-semibold text-base text-blue-800 dark:text-blue-400">{lesson.title}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">{lesson.duration} min</span>
+                    {lesson.hasQuiz && (
+                      <button
+                        className="text-xs text-white bg-blue-600 px-2 py-1 rounded ml-2 hover:bg-blue-700 transition"
+                        onClick={e => {
+                          e.stopPropagation();
+                          window.location.href = `/student/courses/${course.id}/lessons/${lesson.id}/quiz`;
+                        }}
+                      >
+                        Faire le quiz
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-gray-500">Aucune leçon disponible.</div>
+          )}
+        </div>
+      ) : (
+        <div className="mt-8 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded">
+          <span>Vous devez vous inscrire et payer pour accéder au contenu du cours.</span>
+        </div>
+      )}
       {/* Leçons avec navigation vidéo */}
       <div className="flex flex-col md:flex-row gap-8">
         {/* Liste des leçons avec miniatures */}
         <div className="md:w-1/3 w-full">
-          <h2 className="text-xl font-semibold mb-2 dark:text-blue-400">Programme du cours</h2>
+          <h2 className="text-xl font-bold mb-2 dark:text-blue-400">Programme du cours</h2>
           {(course as any).lessons && (course as any).lessons.length > 0 ? (
             <div className="flex flex-col gap-4">
               {(course as any).lessons.map((lesson: any, idx: number) => (
@@ -230,6 +288,10 @@ export default function StudentCourseDetail() {
           </div>
         )}
       </div>
+      {/* Affichage du widget groupe d'étude uniquement si inscrit */}
+      {enrollment?.paid && courseId && (
+        <StudyGroupWidget courseId={courseId} />
+      )}
       <div className="mt-6">
         <Link href="/student/courses" className="text-blue-600 hover:underline dark:text-blue-400">← Retour à la liste des cours</Link>
       </div>

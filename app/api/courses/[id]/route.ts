@@ -21,6 +21,7 @@ export async function GET(
       );
     }
 
+    const session = await getServerSession(authOptions);
     const course = await prisma.course.findUnique({
       where: {
         id: courseId,
@@ -46,6 +47,11 @@ export async function GET(
             enrollments: true,
           },
         },
+        enrollments: session && session.user?.id ? {
+          where: {
+            userId: Number(session.user.id)
+          }
+        } : false,
       },
     });
 
@@ -54,6 +60,12 @@ export async function GET(
         { message: "Cours non trouvé" },
         { status: 404 }
       );
+    }
+
+    // Déterminer si l'utilisateur courant est inscrit
+    let isEnrolled = false;
+    if (session && session.user?.id && course.enrollments) {
+      isEnrolled = course.enrollments.length > 0;
     }
 
     // Transformer les données pour le client
@@ -76,6 +88,7 @@ export async function GET(
       })),
       studentsCount: course._count.enrollments,
       createdAt: course.createdAt,
+      isEnrolled,
     };
 
     return NextResponse.json(formattedCourse);

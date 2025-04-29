@@ -36,6 +36,14 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
     });
     if (existing && existing.paymentStatus === "paid") {
       console.info("Déjà inscrit et payé", { userId, courseId });
+      // Ajout automatique dans le groupe d'étude si pas déjà membre
+      const studyGroup = await prisma.studyGroup.findFirst({ where: { courseId } });
+      if (studyGroup) {
+        const alreadyMember = await prisma.groupMember.findFirst({ where: { groupId: studyGroup.id, userId } });
+        if (!alreadyMember) {
+          await prisma.groupMember.create({ data: { groupId: studyGroup.id, userId } });
+        }
+      }
       return NextResponse.json({ message: "Déjà inscrit et payé." }, { status: 200 });
     }
     if (existing) {
@@ -68,6 +76,14 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
         paymentStatus: "paid",
       },
     });
+    // Ajout automatique dans le groupe d'étude
+    const studyGroup = await prisma.studyGroup.findFirst({ where: { courseId } });
+    if (studyGroup) {
+      const alreadyMember = await prisma.groupMember.findFirst({ where: { groupId: studyGroup.id, userId } });
+      if (!alreadyMember) {
+        await prisma.groupMember.create({ data: { groupId: studyGroup.id, userId } });
+      }
+    }
     const course = await prisma.course.findUnique({ where: { id: courseId } });
     const amount = course?.price ?? 0;
     const transactionId = Math.random().toString(36).substring(2) + Date.now();

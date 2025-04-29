@@ -150,6 +150,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Créer automatiquement un groupe d'étude pour ce cours
+    const studyGroup = await prisma.studyGroup.create({
+      data: {
+        courseId: course.id,
+        name: `Groupe d'étude: ${title}`,
+        createdBy: parseInt(session.user.id),
+        // createdAt est automatique
+      }
+    });
+
+    // Ajouter le créateur comme membre du groupe (rôle admin)
+    await prisma.groupMember.create({
+      data: {
+        groupId: studyGroup.id,
+        userId: parseInt(session.user.id),
+        // joinedAt automatique
+      }
+    });
+
     // Créer les leçons si elles sont fournies
     if (lessons.length > 0) {
       await prisma.lesson.createMany({

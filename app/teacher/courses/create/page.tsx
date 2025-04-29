@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -41,12 +41,17 @@ export default function CreateCoursePage() {
   const closeToast = () => {
     setToast((t) => {
       // Si c'était un succès, on redirige après fermeture
-      if (t.type === "success" && t.visible) {
-        router.push("/teacher/courses");
-      }
+      // Correction : utiliser useEffect pour router.push
       return { ...t, visible: false };
     });
   };
+
+  // Redirection après fermeture du toast de succès
+  useEffect(() => {
+    if (toast.type === "success" && !toast.visible) {
+      router.push("/teacher/courses");
+    }
+  }, [toast, router]);
 
   // Gérer les changements dans le formulaire du cours
   const handleCourseChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

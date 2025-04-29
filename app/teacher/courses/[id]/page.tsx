@@ -181,6 +181,11 @@ export default function CourseDetailsPage({ params }: { params: { id: string } }
     }
   };
 
+  // --- Intégration du widget Groupe d'étude ---
+  // (à placer juste avant le return)
+  // import dynamique pour éviter SSR
+  const StudyGroupWidget = typeof window !== "undefined" ? require("./StudyGroupWidget").default : null;
+
   if (status === "loading" || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -450,6 +455,9 @@ export default function CourseDetailsPage({ params }: { params: { id: string } }
           )}
         </div>
       </div>
+
+      {/* Section Groupe d'étude */}
+      {StudyGroupWidget && <StudyGroupWidget courseId={courseId} />}
     </div>
   );
 }
