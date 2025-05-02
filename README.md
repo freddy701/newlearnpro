@@ -1,8 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NewLearnPro
 
-## Getting Started
+NewLearnPro est une application web développée avec Next.js, conçue pour faciliter l'apprentissage en ligne. Elle offre une plateforme où les étudiants peuvent suivre des cours, participer à des groupes d'étude, et les enseignants peuvent créer et gérer leurs cours.
 
-First, run the development server:
+## Fonctionnalités Principales
+
+- **Gestion des Cours** : Les enseignants peuvent créer, modifier et publier des cours. Les étudiants peuvent s'inscrire à ces cours et suivre leur progression.
+- **Quiz Interactifs** : Chaque leçon peut inclure des quiz pour évaluer la compréhension des étudiants.
+- **Groupes d'Étude** : Les étudiants peuvent rejoindre des groupes d'étude pour collaborer et échanger des idées.
+- **Paiements Sécurisés** : Intégration avec Stripe pour gérer les paiements des cours.
+- **Authentification** : Utilisation de NextAuth pour sécuriser l'accès à l'application.
+
+## Technologies Utilisées
+
+- **Next.js** : Framework React pour le développement de l'application.
+- **Prisma** : ORM pour interagir avec la base de données.
+- **Stripe** : Gestion des paiements en ligne.
+- **Tailwind CSS** : Framework CSS pour le design et la mise en page.
+
+## Démarrage
+
+Pour démarrer le serveur de développement, exécutez :
 
 ```bash
 npm run dev

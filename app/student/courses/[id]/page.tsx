@@ -160,7 +160,6 @@ export default function StudentCourseDetail() {
       {/* Programme du cours */}
       {(!enrollLoading && enrollment?.paid) ? (
         <div>
-          {/* Programme du cours déverrouillé */}
           <h2 className="text-xl font-bold mb-2 mt-8">Programme du cours</h2>
           {(course as any).lessons && (course as any).lessons.length > 0 ? (
             <div className="flex flex-col gap-4">
@@ -214,80 +213,27 @@ export default function StudentCourseDetail() {
           <span>Vous devez vous inscrire et payer pour accéder au contenu du cours.</span>
         </div>
       )}
-      {/* Leçons avec navigation vidéo */}
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Liste des leçons avec miniatures */}
-        <div className="md:w-1/3 w-full">
-          <h2 className="text-xl font-bold mb-2 dark:text-blue-400">Programme du cours</h2>
-          {(course as any).lessons && (course as any).lessons.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {(course as any).lessons.map((lesson: any, idx: number) => (
-                <div
-                  key={lesson.id}
-                  className={`flex items-center gap-4 border p-2 rounded cursor-pointer dark:bg-gray-800 ${!enrollment?.paid ? 'opacity-60 pointer-events-auto' : 'hover:bg-blue-50'}`}
-                  onClick={() => {
-                    if (!enrollment?.paid) {
-                      handleLockedLessonClick();
-                      return;
-                    }
-                    setSelectedLesson(idx);
-                  }}
-                >
-                  <div className="relative w-[120px] h-[68px] flex-shrink-0 bg-gray-200 rounded overflow-hidden">
-                    {lesson.videoUrl ? (
-                      <img
-                        src={`https://img.youtube.com/vi/${getYoutubeId(lesson.videoUrl)}/mqdefault.jpg`}
-                        alt={lesson.title}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-xs flex items-center justify-center w-full h-full">Pas de vidéo</span>
-                    )}
-                  </div>
-                  <div className="flex-1 flex items-center gap-2">
-                    <span className="font-semibold text-base text-blue-800 dark:text-blue-400">{lesson.title}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">{lesson.duration} min</span>
-                    {lesson.hasQuiz && (
-                      <button
-                        className="text-xs text-white bg-blue-600 px-2 py-1 rounded ml-2 hover:bg-blue-700 transition"
-                        onClick={e => {
-                          e.stopPropagation();
-                          window.location.href = `/student/courses/${course.id}/lessons/${lesson.id}/quiz`;
-                        }}
-                      >
-                        Faire le quiz
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-gray-500">Aucune leçon disponible.</div>
-          )}
-        </div>
-        {/* Lecteur vidéo et détails */}
-        {selectedLesson !== null && (course as any).lessons?.[selectedLesson]?.videoUrl && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-            <div className="relative w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden">
-              <button
-                onClick={() => setSelectedLesson(null)}
-                className="absolute top-2 right-2 z-10 bg-white bg-opacity-80 rounded-full px-2 py-1 text-black hover:bg-opacity-100"
-                aria-label="Fermer la vidéo"
-              >
-                ✕
-              </button>
-              <iframe
-                src={`https://www.youtube.com/embed/${getYoutubeId((course as any).lessons[selectedLesson].videoUrl)}?autoplay=1`}
-                title={(course as any).lessons[selectedLesson].title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
-            </div>
+      {/* Lecteur vidéo */}
+      {selectedLesson !== null && (course as any).lessons?.[selectedLesson]?.videoUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+          <div className="relative w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden">
+            <button
+              onClick={() => setSelectedLesson(null)}
+              className="absolute top-2 right-2 z-10 bg-white bg-opacity-80 rounded-full px-2 py-1 text-black hover:bg-opacity-100"
+              aria-label="Fermer la vidéo"
+            >
+              ✕
+            </button>
+            <iframe
+              src={`https://www.youtube.com/embed/${getYoutubeId((course as any).lessons[selectedLesson].videoUrl)}?autoplay=1`}
+              title={(course as any).lessons[selectedLesson].title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            ></iframe>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       {/* Affichage du widget groupe d'étude uniquement si inscrit */}
       {enrollment?.paid && courseId && (
         <StudyGroupWidget courseId={courseId} />
