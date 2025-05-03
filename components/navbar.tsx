@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -47,6 +49,7 @@ const navItems = [
 export function Navbar() {
   const pathname = usePathname()
   const [isScrolled, setIsScrolled] = useState(false)
+  const router = useRouter();
 
   // Détecte le défilement pour changer l'apparence de la navbar
   useEffect(() => {
@@ -70,6 +73,11 @@ export function Navbar() {
     }
   }
 
+  // Fonction pour gérer la recherche globale
+  const handleGlobalSearch = (query: string) => {
+    router.push(`/search?q=${encodeURIComponent(query)}`);
+  }
+
   return (
     <header
       className={cn(
@@ -80,9 +88,11 @@ export function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Logo à gauche */}
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/images/logo.jpg" alt="Logo LearnPro" width={48} height={48} className="w-10 h-10 object-contain" />
-          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent select-none">LearnPro</span>
+          <Image src="/images/logo.jpg" alt="Logo LearnPro" width={48} height={48} className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+          <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent select-none">LearnPro</span>
         </Link>
+        
+        
         {/* Menu centré */}
         <ul className="hidden md:flex flex-1 justify-center gap-8">
           {navItems.map((item) => (

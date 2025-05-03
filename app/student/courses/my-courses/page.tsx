@@ -34,8 +34,8 @@ export default function MyCoursesPage() {
   }, [session]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Mes cours</h1>
+    <div className="container mx-auto px-4 py-4 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Mes cours</h1>
       {loading ? (
         <div>Chargement...</div>
       ) : courses.length === 0 ? (

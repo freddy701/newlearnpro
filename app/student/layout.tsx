@@ -30,16 +30,16 @@ export default function StudentRootLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 dark:bg-gray-950 text-white flex flex-col justify-between">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Sidebar - Ajout de classes pour une meilleure réactivité */}
+      <aside className="w-full md:w-64 bg-gray-800 dark:bg-gray-950 text-white flex flex-col justify-between fixed md:static bottom-0 left-0 z-50 md:z-auto">
         <div>
-          <div className="p-6">
-            <Link href="/student/dashboard" className="text-xl font-bold">
+          <div className="p-4 md:p-6">
+            <Link href="/student/dashboard" className="text-lg md:text-xl font-bold">
               LearnPro
             </Link>
           </div>
-          <nav className="mt-6">
+          <nav className="mt-4 md:mt-6">
             <ul>
               <li>
                 <Link
@@ -99,8 +99,8 @@ export default function StudentRootLayout({ children }: { children: React.ReactN
           </button>
         </div>
       </aside>
-      {/* Main content */}
-      <main className="flex-1 p-8">{children}</main>
+      {/* Main content - Ajustement du padding et de la marge */}
+      <main className="flex-1 p-4 md:p-8 mb-16 md:mb-0">{children}</main>
     </div>
   );
 }

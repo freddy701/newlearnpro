@@ -53,46 +53,82 @@ export default function StudyGroupWidget({ courseId }: { courseId: number }) {
   if (!group) return null;
 
   return (
-    <div className="my-6 p-4 border rounded bg-gray-50">
-      <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-        <span>👥</span> Groupe d'étude
+    <div className="my-4 sm:my-6 p-4 border rounded-lg bg-white shadow-sm">
+      <h2 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
+        <span className="bg-blue-100 p-2 rounded-full">👥</span> 
+        Groupe d'étude
       </h2>
-      <div className="mb-2 text-sm text-gray-700">Membres ({group.members.length}) :</div>
-      <ul className="flex flex-wrap gap-2 mb-3">
-        {group.members.map((member: any) => (
-          <li key={member.user.id} className="flex items-center gap-1 bg-white border rounded px-2 py-1 text-xs">
-            {member.user.profilePictureUrl && (
-              <img src={member.user.profilePictureUrl} alt={member.user.fullName} className="w-6 h-6 rounded-full" />
-            )}
-            <span>{member.user.fullName}</span>
-          </li>
-        ))}
-      </ul>
+
+      {/* Liste des membres */}
+      <div className="mb-3">
+        <div className="text-xs sm:text-sm text-gray-600 mb-2">
+          Membres ({group.members.length})
+        </div>
+        <ul className="flex flex-wrap gap-2">
+          {group.members.map((member: any) => (
+            <li 
+              key={member.user.id} 
+              className="flex items-center gap-2 bg-gray-50 border rounded-full px-3 py-1.5 text-xs sm:text-sm hover:bg-gray-100 transition-colors"
+            >
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium">
+                {member.user.fullName.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-gray-700">{member.user.fullName}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Section des messages */}
       {group.messages && group.messages.length > 0 && (
-        <div>
-          <div className="text-sm text-gray-700 mb-1">Derniers messages :</div>
-          <ul className="space-y-1 mb-2">
-            {group.messages.map((msg: any) => (
-              <li key={msg.id} className="bg-white border rounded p-2 text-xs">
-                <span className="font-semibold">{msg.sender.fullName} :</span> {msg.content}
-                <span className="ml-2 text-gray-400">{new Date(msg.sentAt).toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="mb-4">
+          <div className="text-sm text-gray-600 mb-2">Conversation</div>
+          <div className="bg-gray-50 rounded-lg p-3 max-h-60 overflow-y-auto">
+            <ul className="space-y-2">
+              {group.messages.map((msg: any) => (
+                <li key={msg.id} className="group flex gap-2 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex-shrink-0 flex items-center justify-center text-blue-600 font-medium">
+                    {msg.sender.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-medium text-sm text-gray-800">{msg.sender.fullName}</span>
+                      <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {new Date(msg.sentAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-0.5">{msg.content}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
-      {/* Formulaire d'envoi de message */}
-      <form onSubmit={handleSendMessage} className="flex gap-2 mt-2">
+
+      {/* Formulaire d'envoi */}
+      <form onSubmit={handleSendMessage} className="flex gap-2 mt-4">
         <input
           type="text"
-          className="flex-1 border rounded px-2 py-1 text-xs"
-          placeholder="Votre message..."
+          className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Écrivez votre message..."
           value={message}
           onChange={e => setMessage(e.target.value)}
           disabled={sending}
         />
-        <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded text-xs" disabled={sending || !message.trim()}>
-          Envoyer
+        <button 
+          type="submit" 
+          className="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+          disabled={sending || !message.trim()}
+        >
+          {sending ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Envoi...</span>
+            </>
+          ) : (
+            'Envoyer'
+          )}
         </button>
       </form>
     </div>

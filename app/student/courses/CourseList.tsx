@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Course } from "@/services/courseService";
+import SearchBar from "@/components/SearchBar";
 
 interface CourseListProps {
   initialCourses: Course[];
@@ -39,26 +40,30 @@ export default function CourseList({ initialCourses, initialMeta }: CourseListPr
       });
   }, [page, query]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(1);
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+    
+    // Si la requête est vide, réinitialiser à la première page
+    if (searchQuery === "") {
+      setPage(1);
+    } else {
+      setPage(1); // Toujours revenir à la première page lors d'une nouvelle recherche
+    }
   };
 
   return (
     <div>
       {/* Recherche */}
-      <form className="mb-6 flex gap-2" onSubmit={handleSearch}>
-        <input
-          type="text"
-          className="border rounded px-3 py-2 flex-1"
-          placeholder="Rechercher un cours..."
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Rechercher</button>
-      </form>
+      <SearchBar 
+        placeholder="Rechercher un cours..." 
+        onSearch={handleSearch} 
+        initialValue={query}
+        className="mb-6"
+      />
+      
       {/* Affichage erreur */}
       {error && <div className="text-center text-red-500 mb-4">{error}</div>}
+      
       {/* Grille des cours */}
       {loading ? (
         <div className="text-center text-gray-800 dark:text-gray-200">Chargement...</div>

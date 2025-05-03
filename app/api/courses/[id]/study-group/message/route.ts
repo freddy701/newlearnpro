@@ -4,17 +4,21 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // POST /api/courses/[id]/study-group/message - Envoyer un message dans le groupe d'étude
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
+    if (!session || !session.user) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
-    const courseId = parseInt(params.id);
+    
+    // Attendre params avant d'accéder à ses propriétés
+    const { id } = await params;
+    const courseId = parseInt(id);
+    
     if (isNaN(courseId)) {
       return NextResponse.json({ message: "ID de cours invalide" }, { status: 400 });
     }
-    const { content } = await req.json();
+    const { content } = await request.json();
     if (!content || typeof content !== "string" || !content.trim()) {
       return NextResponse.json({ message: "Message vide" }, { status: 400 });
     }

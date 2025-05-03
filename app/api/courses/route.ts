@@ -1,105 +1,75 @@
-// gérer la création et la récupération des cours
-
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-// GET /api/courses - Récupérer tous les cours (avec filtres)
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const teacherId = url.searchParams.get("teacherId");
-    const limit = parseInt(url.searchParams.get("limit") || "10");
-    const page = parseInt(url.searchParams.get("page") || "1");
+    const { searchParams } = new URL(request.url);
+    
+    // Récupération des paramètres
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const query = searchParams.get("query") || "";
+    const isPublished = searchParams.get("isPublished") === "true";
+    
+    // Calcul de l'offset pour la pagination
     const skip = (page - 1) * limit;
-    const query = url.searchParams.get("query")?.toLowerCase() || "";
-    const isPublished = url.searchParams.get("isPublished");
-
-    // Construire la requête de base
-    const baseQuery: any = {
-      where: {
-        ...(teacherId ? { teacherId: parseInt(teacherId) } : {}),
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        thumbnailUrl: true,
-        price: true,
-        isPublished: true,
-        createdAt: true,
-        teacher: {
-          select: {
-            id: true,
-            fullName: true,
-            profilePictureUrl: true,
-          },
-        },
-        lessons: {
-          select: {
-            id: true,
-          },
-        },
-        _count: {
-          select: {
-            enrollments: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc" as const,
-      },
-      skip,
-      take: limit,
-    };
-
-    // Filtre isPublished
-    if (isPublished === "true") {
-      baseQuery.where.isPublished = true;
+    
+    // Construction des conditions de recherche
+    const whereCondition: any = {};
+    
+    // Condition pour les cours publiés si demandé
+    if (isPublished) {
+      whereCondition.isPublished = true;
     }
-
-    // Filtre recherche query (titre ou description)
+    
+    // Condition de recherche par texte
     if (query) {
-      baseQuery.where.OR = [
-        { title: { contains: query, mode: "insensitive" } },
-        { description: { contains: query, mode: "insensitive" } },
+      whereCondition.OR = [
+        { title: { contains: query } },
+        { description: { contains: query } }
       ];
     }
-
-    // Exécuter la requête
-    const [courses, totalCourses] = await Promise.all([
-      prisma.course.findMany(baseQuery),
-      prisma.course.count({ where: baseQuery.where }),
+    
+    // Exécution des requêtes en parallèle pour les performances
+    const [courses, totalCount] = await Promise.all([
+      prisma.course.findMany({
+        where: whereCondition,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          teacher: {
+            select: {
+              id: true,
+              fullName: true,
+              profilePictureUrl: true
+            }
+          }
+        }
+      }),
+      prisma.course.count({ where: whereCondition })
     ]);
-
-    // Transformer les données pour le client
-    const formattedCourses = courses.map((course) => ({
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      thumbnailUrl: course.thumbnailUrl,
-      price: course.price,
-      isPublished: course.isPublished,
-      teacher: course.teacher,
-      lessonsCount: course.lessons?.length || 0,
-      studentsCount: course._count?.enrollments || 0,
-      createdAt: course.createdAt,
-    }));
-
+    
+    // Calcul des métadonnées de pagination
+    const totalPages = Math.ceil(totalCount / limit);
+    
     return NextResponse.json({
-      courses: formattedCourses,
+      courses,
       meta: {
-        total: totalCourses,
         page,
         limit,
-        pages: Math.ceil(totalCourses / limit),
-      },
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
     });
   } catch (error) {
     console.error("Erreur lors de la récupération des cours:", error);
     return NextResponse.json(
-      { message: "Une erreur est survenue lors de la récupération des cours" },
+      { error: "Erreur lors de la récupération des cours" },
       { status: 500 }
     );
   }
