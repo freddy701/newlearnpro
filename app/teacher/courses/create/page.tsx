@@ -48,7 +48,8 @@ export default function CreateCoursePage() {
 
   // Redirection après fermeture du toast de succès
   useEffect(() => {
-    if (toast.type === "success" && !toast.visible) {
+    // Ne rediriger que si un toast de succès a été affiché puis fermé
+    if (toast.type === "success" && !toast.visible && toast.message !== "") {
       router.push("/teacher/courses");
     }
   }, [toast, router]);
@@ -200,7 +201,8 @@ export default function CreateCoursePage() {
     );
   }
 
-  if (status === "authenticated" && session?.user.role !== "TEACHER" && session?.user.role !== "ADMIN") {
+  // Ajouter une vérification pour s'assurer que la session est chargée avant de rediriger
+  if (status === "authenticated" && session?.user && session?.user.role !== "TEACHER" && session?.user.role !== "ADMIN") {
     router.push("/dashboard");
     return null;
   }

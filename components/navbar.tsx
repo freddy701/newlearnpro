@@ -92,6 +92,7 @@ export function Navbar() {
           <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent select-none">LearnPro</span>
         </Link>
         
+
         
         {/* Menu centré */}
         <ul className="hidden md:flex flex-1 justify-center gap-8">
