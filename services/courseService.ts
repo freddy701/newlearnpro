@@ -34,10 +34,12 @@ export interface CourseFormData {
 export interface CourseListResponse {
   courses: Course[];
   meta: {
-    total: number;
     page: number;
     limit: number;
-    pages: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
   };
 }
 
@@ -80,7 +82,11 @@ export class CourseService {
 
   // Récupérer les cours d'un enseignant
   static async getTeacherCourses(teacherId: number): Promise<CourseListResponse> {
-    return this.getCourses(1, 100, teacherId);
+    const response = await this.getCourses(1, 100, teacherId);
+    return {
+      courses: response.courses,
+      meta: response.meta
+    };
   }
 
   // Publier ou dépublier un cours

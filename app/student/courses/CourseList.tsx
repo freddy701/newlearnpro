@@ -6,7 +6,14 @@ import SearchBar from "@/components/SearchBar";
 
 interface CourseListProps {
   initialCourses: Course[];
-  initialMeta: { page: number; pages: number; total: number; limit: number };
+  initialMeta: { 
+    page: number; 
+    limit: number; 
+    totalCount: number; 
+    totalPages: number; 
+    hasNextPage: boolean; 
+    hasPrevPage: boolean 
+  };
 }
 
 export default function CourseList({ initialCourses, initialMeta }: CourseListProps) {

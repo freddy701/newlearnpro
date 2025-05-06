@@ -12,12 +12,43 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const query = searchParams.get("query") || "";
     const isPublished = searchParams.get("isPublished") === "true";
+    const teacherId = searchParams.get("teacherId");
+    
+    // Vérifier l'authentification pour les requêtes spécifiques à un enseignant
+    const session = await getServerSession(authOptions);
     
     // Calcul de l'offset pour la pagination
     const skip = (page - 1) * limit;
     
     // Construction des conditions de recherche
     const whereCondition: any = {};
+    
+    // Si un teacherId est fourni, filtrer par cet enseignant
+    if (teacherId) {
+      // Vérifier que l'utilisateur est authentifié et qu'il a le droit d'accéder à ces données
+      if (!session) {
+        return NextResponse.json(
+          { error: "Non autorisé" },
+          { status: 401 }
+        );
+      }
+      
+      // Vérifier que l'utilisateur est l'enseignant demandé ou un administrateur
+      if (session.user.id !== teacherId && session.user.role !== "ADMIN") {
+        return NextResponse.json(
+          { error: "Accès non autorisé à ces ressources" },
+          { status: 403 }
+        );
+      }
+      
+      whereCondition.teacherId = parseInt(teacherId);
+    } else if (session?.user.role === "TEACHER") {
+      // Pour les enseignants qui ne spécifient pas de teacherId, ne montrer que leurs propres cours
+      whereCondition.teacherId = parseInt(session.user.id);
+    } else if (isPublished) {
+      // Pour les utilisateurs non authentifiés ou non-enseignants, ne montrer que les cours publiés
+      whereCondition.isPublished = true;
+    }
     
     // Condition pour les cours publiés si demandé
     if (isPublished) {
